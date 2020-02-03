@@ -27,7 +27,8 @@ class Vector:
         self.x = x
         self.y = y
         self.z = z
-        self.projection: Vector
+        self.projection = self
+        self.visible = False
 
     def copy(self, label: Optional[str] = None) -> Vector:
         return Vector(label=self.label if label is None else label, x=self.x, y=self.y, z=self.z)
@@ -61,10 +62,15 @@ class Vector:
         dy = self.y - camera.position.y
         dz = self.z - camera.position.z
 
+        if dz <= 0:
+            self.visible = False
+            return
+
         x = (camera.view_port.z / dz) * dx
         y = (camera.view_port.z / dz) * dy
 
         self.projection = Vector(self.label, x, y)
+        self.visible = True
 
     def __add__(self, other: Vector) -> Vector:
         return Vector(
@@ -90,8 +96,9 @@ class Line:
         self.b = b
 
     def draw(self, canvas: Canvas):
-        canvas.create_line(self.a.projection.x, self.a.projection.y, self.b.projection.x, self.b.projection.y,
-                           width=geometry_options.line_thickness)
+        if self.a.visible & self.b.visible:
+            canvas.create_line(self.a.projection.x, self.a.projection.y, self.b.projection.x, self.b.projection.y,
+                               width=geometry_options.line_thickness)
 
 
 class Triangle:

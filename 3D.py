@@ -1,5 +1,5 @@
 from __future__ import annotations
-from tkinter import Tk, Canvas
+from tkinter import Tk, Canvas, Event
 from geometry import Camera, geometry_options
 from cube import *
 from timeloop import Timeloop
@@ -41,13 +41,10 @@ geometry_options.line_thickness = 1
 
 camera_origin = meshes[0].center + Vector(z=-200)
 camera = Camera(position=camera_origin, focal_length=20)
-camera_speed = 0
+camera_speed = 5
 
 frames = 0
 fps = 0
-
-updating_view = False
-drawing_view = False
 
 view_tl = Timeloop()
 tl = Timeloop()
@@ -56,6 +53,8 @@ tl = Timeloop()
 @view_tl.job(interval=timedelta(milliseconds=refreshDelay))
 def update_view():
     global frames
+
+    print("camera = {}", camera.position)
 
     for idx, mesh in enumerate(meshes):
         mesh.project_to(camera=camera)
@@ -83,12 +82,12 @@ def update_world():
         mesh.rotate_y(angle=rotationSpeeds[idx])
 
     # test different positions
-    camera.position.x += camera_speed
-    if camera.position.x > camera_origin.x + cubeSize:
-        camera.position.x = camera_origin.x - cubeSize
-        camera.position.y += camera_speed * 2
-        if camera.position.y > camera_origin.y + cubeSize:
-            camera.position.y = camera_origin.y - cubeSize
+    # camera.position.x += camera_speed
+    # if camera.position.x > camera_origin.x + cubeSize:
+    #     camera.position.x = camera_origin.x - cubeSize
+    #     camera.position.y += camera_speed * 2
+    #     if camera.position.y > camera_origin.y + cubeSize:
+    #         camera.position.y = camera_origin.y - cubeSize
 
 
 @tl.job(interval=timedelta(seconds=1))
@@ -98,9 +97,26 @@ def fps_counter():
     frames = 0
 
 
+def move_camera(direction: Vector):
+    def mover(event: Event):
+        camera.translate(direction)
+
+    return mover
+
+
 tk = Tk()
 canvas = Canvas(tk, width=width, height=height)
 canvas.pack()
+
+tk.bind(sequence="z", func=move_camera(Vector(z=camera_speed)))
+tk.bind(sequence="w", func=move_camera(Vector(z=camera_speed)))
+tk.bind(sequence="s", func=move_camera(Vector(z=-camera_speed)))
+tk.bind(sequence="q", func=move_camera(Vector(x=-camera_speed)))
+tk.bind(sequence="a", func=move_camera(Vector(x=-camera_speed)))
+tk.bind(sequence="d", func=move_camera(Vector(x=camera_speed)))
+tk.bind(sequence="<space>", func=move_camera(Vector(y=-camera_speed)))
+tk.bind(sequence="<Shift_L>", func=move_camera(Vector(y=camera_speed)))
+
 tl.start()
 view_tl.start()
 tk.after(ms=100, func=draw)
