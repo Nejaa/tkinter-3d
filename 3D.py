@@ -4,19 +4,13 @@ from geometry import Camera, geometry_options
 from cube import *
 from timeloop import Timeloop
 from datetime import timedelta
+from options import options
 
-debug = True
-drawFps = debug | True
-tickRate = 150
-tickDelay = int(1000 / tickRate)
-refreshRate = 60
-refreshDelay = int(1000 / refreshRate)
-width = 800
-height = 600
-windowCenter = Vector(x=width / 2, y=height / 2, z=0)
+geometry_options.line_thickness = 2
 
-originOffset = 1000
-origin = Vector(x=originOffset, y=originOffset, z=originOffset)
+windowCenter = Vector(x=options.width / 2, y=options.height / 2, z=0)
+
+origin = Vector(x=options.originOffset, y=options.originOffset, z=options.originOffset)
 
 cubeSize = 30
 meshes = [
@@ -28,7 +22,7 @@ meshes = [
 ]
 [m.translate(origin) for m in meshes]
 
-rot_speed = 360 / tickRate  # deg/s = rot speed/tick
+rot_speed = 360 / options.tickRate  # deg/s = rot speed/tick
 rotationSpeeds = [
     0,
     rot_speed,
@@ -37,9 +31,7 @@ rotationSpeeds = [
     -rot_speed,
 ]
 
-geometry_options.line_thickness = 1
-
-camera_origin = meshes[0].center + Vector(z=-cubeSize*4)
+camera_origin = meshes[0].center + Vector(z=-cubeSize * 4)
 camera = Camera(position=camera_origin, focal_length=500)
 camera_speed = 5
 
@@ -50,7 +42,7 @@ view_tl = Timeloop()
 tl = Timeloop()
 
 
-@view_tl.job(interval=timedelta(milliseconds=refreshDelay))
+@view_tl.job(interval=timedelta(milliseconds=options.refresh_delay))
 def update_view():
     global frames
 
@@ -58,7 +50,6 @@ def update_view():
         mesh.project_to(camera=camera)
         mesh.translate_projections(windowCenter)
 
-    # loop
     frames += 1
 
 
@@ -66,29 +57,21 @@ def draw():
     canvas.delete("all")
 
     for idx, mesh in enumerate(meshes):
-        mesh.draw(canvas, debug)
+        mesh.draw(canvas, options.debug)
 
-    if drawFps:
+    if options.draw_fps:
         canvas.create_text(20, 10, text=fps)
 
-    if debug:
+    if options.debug:
         canvas.create_text(145, 40, text="{}".format(camera))
 
-    canvas.after(ms=refreshDelay, func=draw)
+    canvas.after(ms=options.refresh_delay, func=draw)
 
 
-@tl.job(interval=timedelta(milliseconds=tickDelay))
+@tl.job(interval=timedelta(milliseconds=options.tick_delay))
 def update_world():
     for idx, mesh in enumerate(meshes):
         mesh.rotate_y(angle=rotationSpeeds[idx])
-
-    # test different positions
-    # camera.position.x += camera_speed
-    # if camera.position.x > camera_origin.x + cubeSize:
-    #     camera.position.x = camera_origin.x - cubeSize
-    #     camera.position.y += camera_speed * 2
-    #     if camera.position.y > camera_origin.y + cubeSize:
-    #         camera.position.y = camera_origin.y - cubeSize
 
 
 @tl.job(interval=timedelta(seconds=1))
@@ -99,21 +82,21 @@ def fps_counter():
 
 
 def move_camera(direction: Vector):
-    def mover(event: Event):
+    def mover(_: Event):
         camera.translate(direction)
 
     return mover
 
 
 def adjust_viewport(amount: float):
-    def mover(event: Event):
+    def mover(_: Event):
         camera.view_port.translate(Vector(z=amount))
 
     return mover
 
 
 tk = Tk()
-canvas = Canvas(tk, width=width, height=height)
+canvas = Canvas(tk, width=options.width, height=options.height)
 canvas.pack()
 
 tk.bind(sequence="z", func=move_camera(Vector(z=camera_speed)))
