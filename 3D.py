@@ -5,7 +5,7 @@ from cube import *
 from timeloop import Timeloop
 from datetime import timedelta
 
-debug = False
+debug = True
 drawFps = debug | True
 tickRate = 150
 tickDelay = int(1000 / tickRate)
@@ -39,8 +39,8 @@ rotationSpeeds = [
 
 geometry_options.line_thickness = 1
 
-camera_origin = meshes[0].center + Vector(z=-200)
-camera = Camera(position=camera_origin, focal_length=20)
+camera_origin = meshes[0].center + Vector(z=-cubeSize*4)
+camera = Camera(position=camera_origin, focal_length=500)
 camera_speed = 5
 
 frames = 0
@@ -53,8 +53,6 @@ tl = Timeloop()
 @view_tl.job(interval=timedelta(milliseconds=refreshDelay))
 def update_view():
     global frames
-
-    print("camera = {}", camera.position)
 
     for idx, mesh in enumerate(meshes):
         mesh.project_to(camera=camera)
@@ -72,6 +70,9 @@ def draw():
 
     if drawFps:
         canvas.create_text(20, 10, text=fps)
+
+    if debug:
+        canvas.create_text(145, 40, text="{}".format(camera))
 
     canvas.after(ms=refreshDelay, func=draw)
 
@@ -104,6 +105,13 @@ def move_camera(direction: Vector):
     return mover
 
 
+def adjust_viewport(amount: float):
+    def mover(event: Event):
+        camera.view_port.translate(Vector(z=amount))
+
+    return mover
+
+
 tk = Tk()
 canvas = Canvas(tk, width=width, height=height)
 canvas.pack()
@@ -116,6 +124,8 @@ tk.bind(sequence="a", func=move_camera(Vector(x=-camera_speed)))
 tk.bind(sequence="d", func=move_camera(Vector(x=camera_speed)))
 tk.bind(sequence="<space>", func=move_camera(Vector(y=-camera_speed)))
 tk.bind(sequence="<Shift_L>", func=move_camera(Vector(y=camera_speed)))
+tk.bind(sequence="<Prior>", func=adjust_viewport(camera_speed))
+tk.bind(sequence="<Next>", func=adjust_viewport(-camera_speed))
 
 tl.start()
 view_tl.start()

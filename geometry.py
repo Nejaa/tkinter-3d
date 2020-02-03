@@ -13,12 +13,16 @@ geometry_options = GeometryOptions()
 
 
 class Camera:
-    def __init__(self, position: Vector, focal_length: float = 100):
+    def __init__(self, position: Vector, focal_length: float = -500):
         self.position = position.copy(label="camera")
-        self.view_port = position.copy(label="view_port").translate(Vector(z=-focal_length))
+        self.view_port = Vector(label="view_port", z=focal_length)
+        # self.view_port = position.copy(label="view_port").translate(Vector(z=-focal_length))
 
     def translate(self, v: Vector):
         self.position.translate(v)
+
+    def __str__(self):
+        return "camera:\n    position={}\n    viewport offset={}".format(self.position, self.view_port)
 
 
 class Vector:
@@ -154,6 +158,7 @@ class Mesh:
 
     def translate_projections(self, v: Vector):
         seen = []
+        self.viewportPosition.translate(v)
         for vertex in self.vertices:
             if vertex in seen:
                 continue
