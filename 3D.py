@@ -7,9 +7,9 @@ from datetime import timedelta
 
 debug = False
 drawFps = debug | True
-tickRate = 15
+tickRate = 150
 tickDelay = int(1000 / tickRate)
-refreshRate = 30
+refreshRate = 60
 refreshDelay = int(1000 / refreshRate)
 width = 800
 height = 600
@@ -18,17 +18,17 @@ windowCenter = Vector(x=width / 2, y=height / 2, z=0)
 originOffset = 1000
 origin = Vector(x=originOffset, y=originOffset, z=originOffset)
 
-cubeSize = 15
+cubeSize = 30
 meshes = [
     Cube(cube_size=cubeSize),
-    Cube(cube_size=cubeSize - 10, center=Vector(y=-20)),
-    Cube(cube_size=cubeSize - 10, center=Vector(y=20)),
-    Cube(cube_size=cubeSize - 10, center=Vector(x=20)),
-    Cube(cube_size=cubeSize - 10, center=Vector(x=-20)),
+    Cube(cube_size=cubeSize / 2, center=Vector(y=-(cubeSize + cubeSize / 2))),
+    Cube(cube_size=cubeSize / 2, center=Vector(y=(cubeSize + cubeSize / 2))),
+    Cube(cube_size=cubeSize / 2, center=Vector(x=(cubeSize + cubeSize / 2))),
+    Cube(cube_size=cubeSize / 2, center=Vector(x=-(cubeSize + cubeSize / 2))),
 ]
 [m.translate(origin) for m in meshes]
 
-rot_speed = 10
+rot_speed = 360 / tickRate  # deg/s = rot speed/tick
 rotationSpeeds = [
     0,
     rot_speed,
@@ -39,7 +39,7 @@ rotationSpeeds = [
 
 geometry_options.line_thickness = 1
 
-camera_origin = meshes[0].center + Vector(z=-100)
+camera_origin = meshes[0].center + Vector(z=-200)
 camera = Camera(position=camera_origin, focal_length=20)
 camera_speed = 0
 
@@ -53,40 +53,28 @@ view_tl = Timeloop()
 tl = Timeloop()
 
 
-@view_tl.job(interval=timedelta(milliseconds=1))
+@view_tl.job(interval=timedelta(milliseconds=refreshDelay))
 def update_view():
-    global frames, updating_view
-
-    # if drawing_view:
-    #     return
-    updating_view = True
+    global frames
 
     for idx, mesh in enumerate(meshes):
         mesh.project_to(camera=camera)
         mesh.translate_projections(windowCenter)
-
-    updating_view = False
 
     # loop
     frames += 1
 
 
 def draw():
-    global drawing_view
-    # if updating_view:
-    #     return
-    drawing_view = True
-
     canvas.delete("all")
 
     for idx, mesh in enumerate(meshes):
         mesh.draw(canvas, debug)
 
     if drawFps:
-        canvas.create_text(10, 10, text=fps)
+        canvas.create_text(20, 10, text=fps)
 
     canvas.after(ms=refreshDelay, func=draw)
-    drawing_view = False
 
 
 @tl.job(interval=timedelta(milliseconds=tickDelay))
