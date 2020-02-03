@@ -6,7 +6,7 @@ from timeloop import Timeloop
 from datetime import timedelta
 from options import options
 
-geometry_options.line_thickness = 2
+geometry_options.line_thickness = 1
 
 windowCenter = Vector(x=options.width / 2, y=options.height / 2, z=0)
 
@@ -38,11 +38,10 @@ camera_speed = 5
 frames = 0
 fps = 0
 
-view_tl = Timeloop()
 tl = Timeloop()
 
 
-@view_tl.job(interval=timedelta(milliseconds=options.refresh_delay))
+@tl.job(interval=timedelta(milliseconds=options.refresh_delay))
 def update_view():
     global frames
 
@@ -111,6 +110,5 @@ tk.bind(sequence="<Prior>", func=adjust_viewport(camera_speed))
 tk.bind(sequence="<Next>", func=adjust_viewport(-camera_speed))
 
 tl.start()
-view_tl.start()
 tk.after(ms=100, func=draw)
 tk.mainloop()
