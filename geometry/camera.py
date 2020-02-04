@@ -15,14 +15,14 @@ class Camera:
         self.position.translate(v)
 
     def rotate(self, rotation: Vector):
-        self.rotation.x = (self.rotation.x - rotation.x) % 360
+        self.rotation.x = (self.rotation.x + rotation.x) % 360
         self.rotation.y = (self.rotation.y + rotation.y) % 360
         self.rotation.z = (self.rotation.z + rotation.z) % 360
         self.rotation_rad.x = radians(self.rotation.x) % (2 * pi)
         self.rotation_rad.y = radians(self.rotation.y) % (2 * pi)
         self.rotation_rad.z = radians(self.rotation.z) % (2 * pi)
         # Invert components for some reason
-        self.bearing = self.bearing.rotate(angle=Vector(x=-rotation.x, y=-rotation.y, z=rotation.z))
+        self.bearing = self.bearing.rotate(angle=Vector(x=rotation.x, y=rotation.y, z=rotation.z))
 
     def project(self, point: Vector, mesh_position: Vector):
         cx = cos(self.rotation_rad.x)
@@ -45,7 +45,7 @@ class Camera:
         x = (self.view_port.z / d_z) * d_x
         y = (self.view_port.z / d_z) * d_y
 
-        point.projection = Vector(point.label, x, y)
+        point.projection = Vector(point.label, x, -y)  # reverse y as the screen origin is top left
         point.visible = True
 
     def __str__(self):

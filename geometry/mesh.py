@@ -46,6 +46,11 @@ class Mesh:
             vertex.projection.translate(v)
             seen.append(vertex)
 
+    def rotate(self, rotation: Vector):
+        self.rotate_x(angle=rotation.x)
+        self.rotate_y(angle=rotation.y)
+        self.rotate_z(angle=rotation.z)
+
     def rotate_x(self, angle: float, center: Optional[Vector] = None):
         center = Vector() if center is None else center
 

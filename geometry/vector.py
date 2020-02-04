@@ -46,7 +46,7 @@ class Vector:
         return self
 
     def rotate_y(self, angle, center: Vector) -> Vector:
-        a = radians(-angle)
+        a = radians(angle)
 
         # translate to origin
         orig_point = self - center
@@ -61,7 +61,7 @@ class Vector:
         return self
 
     def rotate_z(self, angle, center: Vector) -> Vector:
-        a = radians(-angle)
+        a = radians(angle)
 
         # translate to origin
         orig_point = self - center
