@@ -22,47 +22,47 @@ class Quaternion:
     def conjugate(self) -> Quaternion:
         return Quaternion(w=self.w, axis=-self.axis)
 
-    # def euler_angles(self) -> Vector:
-    #     angles = Vector()
-    #
-    #     sinr_cosp = 2 * (self.w * self.axis.x + self.axis.y * self.axis.z)
-    #     cosr_cosp = 1 - 2 * (self.axis.x ** 2 + self.axis.y ** 2)
-    #
-    #     # roll (x-axis rotation)
-    #     angles.x = atan2(sinr_cosp, cosr_cosp)
-    #
-    #     sinp = 2 * (self.w * self.axis.y - self.axis.z * self.axis.x)
-    #     if fabs(sinp) >= 1:
-    #         angles.y = copysign(pi / 2, sinp)
-    #     else:
-    #         angles.y = asin(sinp)
-    #
-    #     siny_cosp = 2 * (self.w * self.axis.z + self.axis.x * self.axis.y)
-    #     cosy_cosp = 1 - 2 * (self.axis.y ** 2 + self.axis.z ** 2)
-    #     angles.yaw = atan2(siny_cosp, cosy_cosp)
-    #
-    #     return angles
-
     def euler_angles(self) -> Vector:
-        test = self.axis.x * self.axis.y + self.axis.z * self.w
-        if (test > 0.499) | (test < -0.499):  # singularity at north or south pole
-            heading = 2 * atan2(self.axis.x, self.w)
-            attitude = pi / 2
-            bank = 0
-            if test < 0:
-                heading = -heading
-                attitude = -attitude
+        angles = Vector()
 
-            return Vector(x=bank, y=heading, z=attitude)
+        sinr_cosp = 2 * (self.w * self.axis.x + self.axis.y * self.axis.z)
+        cosr_cosp = 1 - 2 * (self.axis.x ** 2 + self.axis.y ** 2)
 
-        sqx = self.axis.x ** 2
-        sqy = self.axis.y ** 2
-        sqz = self.axis.z ** 2
-        heading = atan2(2 * self.axis.y * self.w - 2 * self.axis.x * self.axis.z, 1 - 2 * sqy - 2 * sqz)
-        attitude = asin(2 * test)
-        bank = atan2(2 * self.axis.x * self.w - 2 * self.axis.y * self.axis.z, 1 - 2 * sqx - 2 * sqz)
+        # roll (x-axis rotation)
+        angles.x = atan2(sinr_cosp, cosr_cosp)
 
-        return Vector(x=bank, y=heading, z=attitude)
+        sinp = 2 * (self.w * self.axis.y - self.axis.z * self.axis.x)
+        if fabs(sinp) >= 1:
+            angles.y = copysign(pi / 2, sinp)
+        else:
+            angles.y = asin(sinp)
+
+        siny_cosp = 2 * (self.w * self.axis.z + self.axis.x * self.axis.y)
+        cosy_cosp = 1 - 2 * (self.axis.y ** 2 + self.axis.z ** 2)
+        angles.z = atan2(siny_cosp, cosy_cosp)
+
+        return angles
+
+    # def euler_angles(self) -> Vector:
+    #     test = self.axis.x * self.axis.y + self.axis.z * self.w
+    #     if (test > 0.499) | (test < -0.499):  # singularity at north or south pole
+    #         heading = 2 * atan2(self.axis.x, self.w)
+    #         attitude = pi / 2
+    #         bank = 0
+    #         if test < 0:
+    #             heading = -heading
+    #             attitude = -attitude
+    #
+    #         return Vector(x=bank, y=heading, z=attitude)
+    #
+    #     sqx = self.axis.x ** 2
+    #     sqy = self.axis.y ** 2
+    #     sqz = self.axis.z ** 2
+    #     heading = atan2(2 * self.axis.y * self.w - 2 * self.axis.x * self.axis.z, 1 - 2 * sqy - 2 * sqz)
+    #     attitude = asin(2 * test)
+    #     bank = atan2(2 * self.axis.x * self.w - 2 * self.axis.y * self.axis.z, 1 - 2 * sqx - 2 * sqz)
+    #
+    #     return Vector(x=bank, y=heading, z=attitude)
 
     @staticmethod
     def axis_angle(axis: Vector, angle: float) -> Quaternion:

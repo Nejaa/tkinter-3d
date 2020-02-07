@@ -9,16 +9,16 @@ class Camera:
         self.position = position.copy(label="camera")
         self.rotation = Quaternion.identity()
         self.bearing = Vector(z=1)
+        self.bearing.projection = Vector(z=1)
         self.view_port = Vector(label="view_port", z=focal_length)
 
     def translate(self, v: Vector):
-        self.position.translate(v)
+        self.position.translate(self.rotation.rotate(v))
 
     def rotate(self, axis: Vector, angle: float):
-        a = axis  # self.rotation.rotate(axis)
-        rot = Quaternion.axis_angle(a, angle)
-        self.bearing.move_to(rot.rotate(self.bearing))
+        rot = Quaternion.axis_angle(axis=axis, angle=angle)
         self.rotation *= rot
+        self.bearing.projection.move_to(self.rotation.rotate(self.bearing))
 
     def project(self, point: Vector, mesh_position: Vector):
         euler = self.rotation.euler_angles()
@@ -31,7 +31,8 @@ class Camera:
 
         delta = point + mesh_position - self.position
 
-        if delta.dot(self.bearing) <= 1:
+        dot = delta.dot(self.bearing.projection)
+        if dot <= 1:
             point.visible = False
             return
 
@@ -43,6 +44,7 @@ class Camera:
         y = (self.view_port.z / d_z) * d_y
 
         point.projection = Vector(point.label, x, -y)  # reverse y as the screen origin is top left
+        point.projection.d = dot
         point.visible = True
 
     def __str__(self):
@@ -51,7 +53,6 @@ class Camera:
                "    position={}\n" \
                "    rotation_quat={}\n" \
                "    rotation_euler={}\n" \
-               "    rotation_euler_deg={}\n" \
                "    bearing={}\n" \
-               "    viewport offset={}".format(self.position, self.rotation, euler_angles, euler_angles.to_degree(),
-                                               self.bearing, self.view_port)
+               "    viewport offset={}".format(self.position, self.rotation, euler_angles.to_degree(),
+                                               self.bearing.projection, self.view_port)
