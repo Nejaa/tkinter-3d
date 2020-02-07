@@ -1,7 +1,7 @@
 from tkinter import Canvas
 
-from geometry.vector import Vector
 from geometry.line import Line
+from geometry.vector import Vector
 
 
 class Triangle:

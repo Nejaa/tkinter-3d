@@ -1,6 +1,6 @@
 class Options:
     def __init__(self):
-        self.debug = True
+        self.debug = False
         self.draw_fps = True
         self.tickRate = 150
         self.refreshRate = 60

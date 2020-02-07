@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from tkinter import Canvas
-from typing import Optional
 
 from geometry.Triangle import Triangle
 from geometry.camera import Camera
-from geometry.vector import Vector
 from geometry.quaternion import Quaternion
+from geometry.vector import Vector
 
 
 class Mesh:

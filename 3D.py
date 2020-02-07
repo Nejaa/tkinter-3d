@@ -1,15 +1,18 @@
 from __future__ import annotations
+
+from datetime import timedelta
+from random import random
 from tkinter import Tk, Canvas, Event
+
+from timeloop import Timeloop
+
 from geometry import geometry_options
 from geometry.camera import Camera
 from geometry.quaternion import Quaternion
 from geometry.vector import Vector
+from options import options
 from shape.cube import Cube
 from shape.plane import Plane
-from timeloop import Timeloop
-from datetime import timedelta
-from options import options
-from random import random
 
 geometry_options.line_thickness = 1
 
@@ -17,13 +20,14 @@ windowCenter = Vector(x=options.width / 2, y=options.height / 2, z=0)
 
 origin = Vector(x=options.originOffset, y=options.originOffset, z=options.originOffset)
 
-cubeSize = 30
-plane = Plane(length=10)
+cubeSize = 20
+plane = Plane(length=10, grid_size=5.0)
+plane.translate(Vector(x=-cubeSize, y=-cubeSize, z=cubeSize))
 meshes = [
     plane,
     plane.copy().rotate(rotation=Quaternion.axis_angle(Vector(x=1), angle=-90)),
     plane.copy().rotate(rotation=Quaternion.axis_angle(Vector(y=1), angle=90)),
-    # Cube(cube_size=cubeSize),
+    Cube(cube_size=cubeSize),
     # Cube(cube_size=cubeSize / 2, origin=Vector(y=(cubeSize + cubeSize / 2))),
     # Cube(cube_size=cubeSize / 2, origin=Vector(y=-(cubeSize + cubeSize / 2))),
     # Cube(cube_size=cubeSize / 2, origin=Vector(x=(cubeSize + cubeSize / 2))),
@@ -35,8 +39,10 @@ meshes = [
 
 rot_speed = 180 / options.tickRate  # deg/s = rot speed/tick
 rotationSpeeds = [
-    # Quaternion.identity(),
-    # Quaternion.axis_angle(Vector(x=random(), y=random(), z=random()), angle=rot_speed),
+    Quaternion.identity(),
+    Quaternion.identity(),
+    Quaternion.identity(),
+    Quaternion.axis_angle(Vector(x=random(), y=random(), z=random()), angle=rot_speed),
     # Quaternion.axis_angle(Vector(x=1), angle=-rot_speed),
     # Quaternion.axis_angle(Vector(x=1), angle=rot_speed),
     # Quaternion.axis_angle(Vector(y=1), angle=rot_speed),
@@ -45,7 +51,7 @@ rotationSpeeds = [
     # Quaternion.axis_angle(Vector(z=1), angle=-rot_speed),
 ]
 
-camera_origin = meshes[0].center + Vector(z=-cubeSize * 4)
+camera_origin = meshes[3].center + Vector(z=-cubeSize * 4)
 camera = Camera(position=camera_origin, focal_length=500)
 camera_speed = 1
 
@@ -55,6 +61,7 @@ fps = 0
 tl = Timeloop()
 
 
+# disabled for now
 # @tl.job(interval=timedelta(milliseconds=options.refresh_delay))
 # def update_view():
 #     global frames
@@ -83,9 +90,9 @@ def draw():
     if options.draw_fps:
         canvas.create_text(20, 10, text=fps)
 
+    canvas.create_line(options.width / 2, 0, options.width / 2, options.height, width=1)
+    canvas.create_line(0, options.height / 2, options.width, options.height / 2, width=1)
     if options.debug:
-        canvas.create_line(options.width / 2, 0, options.width / 2, options.height, width=1)
-        canvas.create_line(0, options.height / 2, options.width, options.height / 2, width=1)
         canvas.create_text(145, 40, text="{}".format(camera))
 
     canvas.after(ms=1, func=draw)

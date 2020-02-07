@@ -1,7 +1,7 @@
-from math import radians, pi, cos, sin
+from math import cos, sin
 
-from geometry.vector import Vector
 from geometry.quaternion import Quaternion
+from geometry.vector import Vector
 
 
 class Camera:

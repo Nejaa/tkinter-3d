@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from math import radians, sin, cos, sqrt, atan2, asin, pi, fabs, copysign
 
 from geometry.vector import Vector
@@ -42,27 +43,6 @@ class Quaternion:
         angles.z = atan2(siny_cosp, cosy_cosp)
 
         return angles
-
-    # def euler_angles(self) -> Vector:
-    #     test = self.axis.x * self.axis.y + self.axis.z * self.w
-    #     if (test > 0.499) | (test < -0.499):  # singularity at north or south pole
-    #         heading = 2 * atan2(self.axis.x, self.w)
-    #         attitude = pi / 2
-    #         bank = 0
-    #         if test < 0:
-    #             heading = -heading
-    #             attitude = -attitude
-    #
-    #         return Vector(x=bank, y=heading, z=attitude)
-    #
-    #     sqx = self.axis.x ** 2
-    #     sqy = self.axis.y ** 2
-    #     sqz = self.axis.z ** 2
-    #     heading = atan2(2 * self.axis.y * self.w - 2 * self.axis.x * self.axis.z, 1 - 2 * sqy - 2 * sqz)
-    #     attitude = asin(2 * test)
-    #     bank = atan2(2 * self.axis.x * self.w - 2 * self.axis.y * self.axis.z, 1 - 2 * sqx - 2 * sqz)
-    #
-    #     return Vector(x=bank, y=heading, z=attitude)
 
     @staticmethod
     def axis_angle(axis: Vector, angle: float) -> Quaternion:

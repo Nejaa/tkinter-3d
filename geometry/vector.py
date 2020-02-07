@@ -24,57 +24,6 @@ class Vector:
         self.z += v.z
         return self
 
-    # def rotate(self, angle: Vector, center: Vector = None):
-    #     center = Vector() if center is None else center
-    #     temp = self.rotate_x(angle.x, center)
-    #     temp = temp.rotate_y(angle.y, center)
-    #     temp = temp.rotate_z(angle.z, center)
-    #     return temp
-    #
-    # def rotate_x(self, angle, center: Vector) -> Vector:
-    #     a = radians(angle)
-    #
-    #     # translate to origin
-    #     orig_point = self - center
-    #
-    #     # rotate
-    #     new_y = orig_point.z * sin(a) + orig_point.y * cos(a)
-    #     new_z = orig_point.z * cos(a) - orig_point.y * sin(a)
-    #
-    #     # translate back
-    #     self.y = new_y + center.y
-    #     self.z = new_z + center.z
-    #     return self
-    #
-    # def rotate_y(self, angle, center: Vector) -> Vector:
-    #     a = radians(angle)
-    #
-    #     # translate to origin
-    #     orig_point = self - center
-    #
-    #     # rotate
-    #     new_x = orig_point.z * sin(a) + orig_point.x * cos(a)
-    #     new_z = orig_point.z * cos(a) - orig_point.x * sin(a)
-    #
-    #     # translate back
-    #     self.x = new_x + center.x
-    #     self.z = new_z + center.z
-    #     return self
-    #
-    # def rotate_z(self, angle, center: Vector) -> Vector:
-    #     a = radians(angle)
-    #
-    #     # translate to origin
-    #     orig_point = self - center
-    #
-    #     # rotate
-    #     new_x = orig_point.y * sin(a) + orig_point.x * cos(a)
-    #     new_y = orig_point.y * cos(a) - orig_point.x * sin(a)
-    #
-    #     self.x = new_x + center.x
-    #     self.y = new_y + center.y
-    #     return self
-
     def draw(self, canvas: Canvas):
         canvas.create_text(self.projection.x, self.projection.y, text=self.label)
         canvas.create_text(self.projection.x, self.projection.y+10, text="{:.2}".format(self.projection.d))
