@@ -14,9 +14,11 @@ class Camera:
     def translate(self, v: Vector):
         self.position.translate(v)
 
-    def rotate(self, rotation: Quaternion):
-        self.bearing.move_to(rotation.rotate(self.bearing))
-        self.rotation *= rotation
+    def rotate(self, axis: Vector, angle: float):
+        a = axis  # self.rotation.rotate(axis)
+        rot = Quaternion.axis_angle(a, angle)
+        self.bearing.move_to(rot.rotate(self.bearing))
+        self.rotation *= rot
 
     def project(self, point: Vector, mesh_position: Vector):
         euler = self.rotation.euler_angles()
@@ -29,9 +31,9 @@ class Camera:
 
         delta = point + mesh_position - self.position
 
-        # if delta.dot(self.bearing) <= 1:
-        #     point.visible = False
-        #     return
+        if delta.dot(self.bearing) <= 1:
+            point.visible = False
+            return
 
         d_x = cy * (sz * delta.y + cz * delta.x) - sy * delta.z
         d_y = sx * (cy * delta.z + sy * (sz * delta.y + cz * delta.x)) + cx * (cz * delta.y - sz * delta.x)
@@ -44,11 +46,12 @@ class Camera:
         point.visible = True
 
     def __str__(self):
+        euler_angles = self.rotation.euler_angles()
         return "camera:\n" \
                "    position={}\n" \
-               "    rotation={}\n" \
+               "    rotation_quat={}\n" \
                "    rotation_euler={}\n" \
+               "    rotation_euler_deg={}\n" \
                "    bearing={}\n" \
-               "    viewport offset={}".format(self.position, self.rotation, self.rotation.euler_angles(),
-                                               self.bearing,
-                                               self.view_port)
+               "    viewport offset={}".format(self.position, self.rotation, euler_angles, euler_angles.to_degree(),
+                                               self.bearing, self.view_port)
