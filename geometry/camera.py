@@ -1,42 +1,37 @@
 from math import radians, pi, cos, sin
 
 from geometry.vector import Vector
+from geometry.quaternion import Quaternion
 
 
 class Camera:
     def __init__(self, position: Vector, focal_length: float = 500):
         self.position = position.copy(label="camera")
-        self.rotation = Vector()
-        self.rotation_rad = Vector()
+        self.rotation = Quaternion.identity()
         self.bearing = Vector(z=1)
         self.view_port = Vector(label="view_port", z=focal_length)
 
     def translate(self, v: Vector):
         self.position.translate(v)
 
-    def rotate(self, rotation: Vector):
-        self.rotation.x = (self.rotation.x + rotation.x) % 360
-        self.rotation.y = (self.rotation.y + rotation.y) % 360
-        self.rotation.z = (self.rotation.z + rotation.z) % 360
-        self.rotation_rad.x = radians(self.rotation.x) % (2 * pi)
-        self.rotation_rad.y = radians(self.rotation.y) % (2 * pi)
-        self.rotation_rad.z = radians(self.rotation.z) % (2 * pi)
-        # Invert components for some reason
-        self.bearing = self.bearing.rotate(angle=Vector(x=rotation.x, y=rotation.y, z=rotation.z))
+    def rotate(self, rotation: Quaternion):
+        self.bearing.move_to(rotation.rotate(self.bearing))
+        self.rotation *= rotation
 
     def project(self, point: Vector, mesh_position: Vector):
-        cx = cos(self.rotation_rad.x)
-        sx = sin(self.rotation_rad.x)
-        cy = cos(self.rotation_rad.y)
-        sy = sin(self.rotation_rad.y)
-        cz = cos(self.rotation_rad.z)
-        sz = sin(self.rotation_rad.z)
+        euler = self.rotation.euler_angles()
+        cx = cos(euler.x)
+        sx = sin(euler.x)
+        cy = cos(euler.y)
+        sy = sin(euler.y)
+        cz = cos(euler.z)
+        sz = sin(euler.z)
 
         delta = point + mesh_position - self.position
 
-        if delta.dot(self.bearing) <= 0.0:
-            point.visible = False
-            return
+        # if delta.dot(self.bearing) <= 1:
+        #     point.visible = False
+        #     return
 
         d_x = cy * (sz * delta.y + cz * delta.x) - sy * delta.z
         d_y = sx * (cy * delta.z + sy * (sz * delta.y + cz * delta.x)) + cx * (cz * delta.y - sz * delta.x)
@@ -52,8 +47,8 @@ class Camera:
         return "camera:\n" \
                "    position={}\n" \
                "    rotation={}\n" \
-               "    rotation_rad={}\n" \
+               "    rotation_euler={}\n" \
                "    bearing={}\n" \
-               "    viewport offset={}".format(self.position, self.rotation, self.rotation_rad.copy() / pi,
+               "    viewport offset={}".format(self.position, self.rotation, self.rotation.euler_angles(),
                                                self.bearing,
                                                self.view_port)
