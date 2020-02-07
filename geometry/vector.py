@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from math import radians, sin, cos, sqrt
+from math import degrees, sqrt
 from tkinter import Canvas
 from typing import Optional
 
@@ -91,6 +91,9 @@ class Vector:
         self.x = v.x
         self.y = v.y
         self.z = v.z
+
+    def to_degree(self):
+        return Vector(x=degrees(self.x), y=degrees(self.y), z=degrees(self.z))
 
     def __invert__(self) -> Vector:
         return Vector(x=-self.x, y=-self.y, z=-self.z)
