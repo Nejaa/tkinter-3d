@@ -47,7 +47,7 @@ class Mesh:
             vertex.projection.translate(v)
             seen.append(vertex)
 
-    def rotate(self, rotation: Quaternion):
+    def rotate(self, rotation: Quaternion) -> Mesh:
         seen = []
         for vertex in self.vertices:
             if vertex in seen:
@@ -55,6 +55,7 @@ class Mesh:
             v = rotation.rotate(vertex)
             vertex.move_to(v)
             seen.append(vertex)
+        return self
 
     def project_to(self, camera: Camera):
         seen = []
@@ -66,7 +67,7 @@ class Mesh:
 
         camera.project(point=self.viewportPosition, mesh_position=self.center)
 
-    def copy(self, offset: Vector) -> Mesh:
+    def copy(self, offset: Vector = Vector()) -> Mesh:
         vertices = [p.copy() for p in self.vertices]
         m = Mesh(*vertices)
         m.set_center(self.center.copy())
