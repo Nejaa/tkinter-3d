@@ -32,12 +32,14 @@ class Quaternion:
         # roll (x-axis rotation)
         angles.x = atan2(sinr_cosp, cosr_cosp)
 
+        # pitch
         sinp = 2 * (self.w * self.axis.y - self.axis.z * self.axis.x)
         if fabs(sinp) >= 1:
             angles.y = copysign(pi / 2, sinp)
         else:
             angles.y = asin(sinp)
 
+        # yaw
         siny_cosp = 2 * (self.w * self.axis.z + self.axis.x * self.axis.y)
         cosy_cosp = 1 - 2 * (self.axis.y ** 2 + self.axis.z ** 2)
         angles.z = atan2(siny_cosp, cosy_cosp)

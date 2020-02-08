@@ -7,6 +7,7 @@ class Options:
         self.width = 800
         self.height = 600
         self.originOffset = 1000
+        self.cross_hair_scale = 10
 
     @property
     def tick_delay(self):
