@@ -63,33 +63,43 @@ fps = 0
 
 tl = Timeloop()
 
+updating_view = False
+
 
 # disabled for now
-# @tl.job(interval=timedelta(milliseconds=options.refresh_delay))
-# def update_view():
-#     global frames
-#
-#     for idx, mesh in enumerate(meshes):
-#         mesh.project_to(camera=camera)
-#         mesh.translate_projections(windowCenter)
-#
-#     frames += 1
+@tl.job(interval=timedelta(milliseconds=options.refresh_delay))
+def update_view():
+    global frames, updating_view
 
+    if drawing:
+        return
 
-def draw():
-    global frames
-
+    updating_view = True
     for idx, mesh in enumerate(meshes):
         mesh.project_to(camera=camera)
         mesh.translate_projections(windowCenter)
 
     frames += 1
+    updating_view = False
 
+
+drawing = False
+
+
+def draw():
+    global frames, drawing
+
+    if updating_view:
+        canvas.after(ms=1, func=draw)
+        return
+
+    drawing = True
     canvas.delete("all")
 
     for idx, mesh in enumerate(meshes):
         mesh.draw(canvas, options.debug)
 
+    drawing = False
     if options.draw_fps:
         canvas.create_text(20, 10, text=fps)
 
@@ -105,6 +115,7 @@ def draw():
         canvas.create_text(145, 40, text="{}".format(camera))
 
     canvas.after(ms=1, func=draw)
+
 
 
 @tl.job(interval=timedelta(milliseconds=options.tick_delay))
