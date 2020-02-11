@@ -134,7 +134,7 @@ def fps_counter():
 
 def move_camera(direction: Vector):
     def mover(_: Event):
-        camera.translate(direction)
+        camera.translate(direction, options.global_movement)
 
     return mover
 

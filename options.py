@@ -11,6 +11,7 @@ class Options:
         self.height = 600
         self.originOffset = 1000
         self.cross_hair_scale = 10
+        self.global_movement = False
 
     @property
     def tick_delay(self):

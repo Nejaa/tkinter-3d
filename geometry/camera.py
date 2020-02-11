@@ -12,8 +12,11 @@ class Camera:
         self.bearing.projection = Vector(z=1)
         self.view_port = Vector(label="view_port", z=focal_length)
 
-    def translate(self, v: Vector):
-        self.position.translate(self.rotation.rotate(v))
+    def translate(self, v: Vector, global_movement: bool = False):
+        if not global_movement:
+            v = self.rotation.rotate(v)
+
+        self.position.translate(v)
 
     def rotate(self, axis: Vector, angle: float):
         rot = Quaternion.axis_angle(axis=axis, angle=angle)
