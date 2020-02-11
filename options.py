@@ -5,7 +5,7 @@ class Options:
     def __init__(self):
         self.debug = False
         self.draw_fps = True
-        self.tickRate = 150
+        self.tickRate = 60
         self.refreshRate = 120
         self.width = 800
         self.height = 600

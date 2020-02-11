@@ -26,7 +26,7 @@ windowCenter = Vector(x=options.width / 2, y=options.height / 2, z=0)
 origin = Vector(x=options.originOffset, y=options.originOffset, z=options.originOffset)
 
 cubeSize = 20
-plane = Plane(length=10, grid_size=5.0)
+plane = Plane(length=2, grid_size=60.0)
 plane.translate(Vector(x=-cubeSize, y=-cubeSize, z=cubeSize))
 cube = Cube(cube_size=cubeSize)
 meshes = [
@@ -34,12 +34,12 @@ meshes = [
     plane.copy().rotate(rotation=Quaternion.axis_angle(Vector(x=1), angle=-90)),
     plane.copy().rotate(rotation=Quaternion.axis_angle(Vector(y=1), angle=90)),
     cube,
-    # Cube(cube_size=cubeSize / 2, origin=Vector(y=(cubeSize + cubeSize / 2))),
-    # Cube(cube_size=cubeSize / 2, origin=Vector(y=-(cubeSize + cubeSize / 2))),
-    # Cube(cube_size=cubeSize / 2, origin=Vector(x=(cubeSize + cubeSize / 2))),
-    # Cube(cube_size=cubeSize / 2, origin=Vector(x=-(cubeSize + cubeSize / 2))),
-    # Cube(cube_size=cubeSize / 2, origin=Vector(z=(cubeSize + cubeSize / 2))),
-    # Cube(cube_size=cubeSize / 2, origin=Vector(z=-(cubeSize + cubeSize / 2))),
+    Cube(cube_size=cubeSize / 2, origin=Vector(y=(cubeSize + cubeSize / 2))),
+    Cube(cube_size=cubeSize / 2, origin=Vector(y=-(cubeSize + cubeSize / 2))),
+    Cube(cube_size=cubeSize / 2, origin=Vector(x=(cubeSize + cubeSize / 2))),
+    Cube(cube_size=cubeSize / 2, origin=Vector(x=-(cubeSize + cubeSize / 2))),
+    Cube(cube_size=cubeSize / 2, origin=Vector(z=(cubeSize + cubeSize / 2))),
+    Cube(cube_size=cubeSize / 2, origin=Vector(z=-(cubeSize + cubeSize / 2))),
 ]
 [m.translate(origin) for m in meshes]
 entities = [Entity(geometry=m) for m in meshes]
@@ -101,25 +101,24 @@ def draw():
     new_scene = pipeline.pull_scene()
     if new_scene is not None:
         last_scene = new_scene
-    print("pull time = {}".format(time.time() - b_pull))
+    print("pull time = {:.6}ms".format((time.time() - b_pull)*1000))
 
     if last_scene is None:
         canvas.after(ms=10, func=draw)
         return
 
     b_extract = time.time()
-    ents = last_scene.entities()
-    msh = [entity.geometry for entity in ents]
-    print("extract time = {}".format(time.time() - b_extract))
+    msh = [entity.geometry for entity in last_scene.entities()]
+    print("extract time = {:.6}ms".format((time.time() - b_extract)*1000))
 
     canvas.delete("all")
 
     b_draw = time.time()
 
     for mesh in msh:
+        m_draw = time.time()
         mesh.draw(canvas, options.debug)
-
-
+        print("mesh draw time = {:.6}ms".format((time.time() - m_draw) * 1000))
 
     if options.draw_fps:
         canvas.create_text(20, 10, text=fps)
@@ -132,11 +131,11 @@ def draw():
                        width=2)
     if options.debug:
         canvas.create_text(145, 40, text="{}".format(camera))
-    print("draw time = {}".format(time.time() - b_draw))
+    print("draw time = {:.6}ms".format((time.time() - b_draw)*1000))
 
     frames += 1
 
-    print("full draw time = {}\n---------------------------------".format(time.time() - b_draw))
+    print("full draw time = {:.6}ms\n---------------------------------".format((time.time() - b_draw)*1000))
 
     canvas.after(ms=1, func=draw)
 
@@ -187,15 +186,19 @@ def follow_mouse(event: Event):
     x_off = x - windowCenter.x
     y_off = y - windowCenter.y
 
+    axis = Vector()
+
     if x_off < 0:
-        view_left(event)
+        axis.y = -1
     elif x_off > 0:
-        view_right(event)
+        axis.y = 1
 
     if y_off < 0:
-        view_up(event)
+        axis.x = -1
     elif y_off > 0:
-        view_down(event)
+        axis.x = 1
+
+    camera.rotate(axis, camera_speed)
 
     tk.event_generate('<Motion>', warp=True, x=windowCenter.x, y=windowCenter.y)
 
@@ -215,9 +218,9 @@ def toggle_fps(_: Event):
     options.draw_fps = not options.draw_fps
 
 
-view_up = rotate_camera(axis=Vector(x=1), angle=-camera_speed)
+view_up = rotate_camera(axis=Vector(x=-1), angle=camera_speed)
 view_down = rotate_camera(axis=Vector(x=1), angle=camera_speed)
-view_left = rotate_camera(axis=Vector(y=1), angle=-camera_speed)
+view_left = rotate_camera(axis=Vector(y=-1), angle=camera_speed)
 view_right = rotate_camera(axis=Vector(y=1), angle=camera_speed)
 
 tk = Tk()
