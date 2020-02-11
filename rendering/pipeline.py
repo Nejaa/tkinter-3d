@@ -1,8 +1,9 @@
-from queue import Queue
+from queue import Queue, Empty
 from threading import Thread
-from typing import List
+from typing import List, Optional
 
 from rendering.pipeline_step import PipelineStep
+from scene.scene import Scene
 
 
 class Pipeline:
@@ -21,9 +22,18 @@ class Pipeline:
                 self.input_queue = step.input_queue
             else:
                 steps[idx - 1].output_queue = step.input_queue
-                step.output_queue = self.output_queue
+            step.output_queue = self.output_queue
             step.start()
 
     def stop(self):
         for step in self.steps:
             step.stop()
+
+    def push_scene(self, scene: Scene):
+        self.input_queue.put(scene)
+
+    def pull_scene(self) -> Optional[Scene]:
+        try:
+            return self.output_queue.get_nowait()
+        except Empty:
+            return None

@@ -34,7 +34,7 @@ class PipelineStep(ABC, Thread):
                 pass
         try:
             self.output_queue.put_nowait(scene)
-        finally:
+        except Full:
             pass
 
     def run(self):

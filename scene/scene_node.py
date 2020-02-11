@@ -15,5 +15,13 @@ class SceneNode:
     def add_entity(self, entity: Entity):
         self.entities.append(entity)
 
-    def register_child(self, child:  SceneNode):
+    def register_child(self, child: SceneNode):
         self.childs.append(child)
+
+    def copy(self, parent: SceneNode = None) -> SceneNode:
+        copy = SceneNode(parent=parent)
+
+        [copy.add_entity(entity=entity.copy()) for entity in self.entities]
+        [child.copy(copy) for child in self.childs]
+
+        return copy

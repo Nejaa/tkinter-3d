@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import List
 
 from scene.entity import Entity
@@ -20,3 +21,10 @@ class Scene:
             entities.extend(self.entities_from_node(n))
 
         return entities
+
+    def copy(self) -> Scene:
+        copy = Scene()
+
+        copy.scene_root = self.scene_root.copy()
+
+        return copy

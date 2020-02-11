@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import copy
 from datetime import timedelta
 from random import random
 from tkinter import Tk, Canvas, Event
-
+import time
 from timeloop import Timeloop
 
 from geometry import geometry_options
@@ -14,6 +15,7 @@ from options import options
 from rendering.collectorStep import CollectorStep
 from rendering.pipeline import Pipeline
 from scene.entity import Entity
+from scene.scene import Scene
 from shape.cube import Cube
 from shape.plane import Plane
 
@@ -41,6 +43,10 @@ meshes = [
 ]
 [m.translate(origin) for m in meshes]
 entities = [Entity(geometry=m) for m in meshes]
+
+scene = Scene()
+[scene.scene_root.add_entity(e) for e in entities]
+
 rot_speed = 180 / options.tickRate  # deg/s = rot speed/tick
 cube_rot_axis = Vector(x=random(), y=random(), z=random())
 point2 = cube_rot_axis.copy() * 100
@@ -71,48 +77,50 @@ pipeline = Pipeline(steps=[
 
 tl = Timeloop()
 
-updating_view = False
 
-
-# disabled for now
-@tl.job(interval=timedelta(milliseconds=options.refresh_delay))
+@tl.job(interval=timedelta(milliseconds=options.refresh_delay / 2))
 def update_view():
-    global frames, updating_view
+    local_scene = scene.copy()
+    ent = local_scene.entities()
+    mhs = [entity.geometry for entity in ent]
 
-    if drawing:
-        return
-
-    updating_view = True
-    for idx, mesh in enumerate(meshes):
+    for idx, mesh in enumerate(mhs):
         mesh.project_to(camera=camera)
         mesh.translate_projections(windowCenter)
 
-    frames += 1
-    updating_view = False
+    pipeline.push_scene(scene=local_scene)
 
 
-drawing = False
+last_scene = None
 
 
 def draw():
-    global frames, drawing
+    global frames, last_scene
 
-    if updating_view:
-        canvas.after(ms=1, func=draw)
+    b_pull = time.time()
+    new_scene = pipeline.pull_scene()
+    if new_scene is not None:
+        last_scene = new_scene
+    print("pull time = {}".format(time.time() - b_pull))
+
+    if last_scene is None:
+        canvas.after(ms=10, func=draw)
         return
 
-    # scene = pipeline.output_queue.get(block=True, timeout=None)
-    #
-    # entities = scene.entities()
-    # meshes = [entity.geometry for entity in entities]
+    b_extract = time.time()
+    ents = last_scene.entities()
+    msh = [entity.geometry for entity in ents]
+    print("extract time = {}".format(time.time() - b_extract))
 
-    drawing = True
     canvas.delete("all")
 
-    for idx, mesh in enumerate(meshes):
+    b_draw = time.time()
+
+    for mesh in msh:
         mesh.draw(canvas, options.debug)
 
-    drawing = False
+
+
     if options.draw_fps:
         canvas.create_text(20, 10, text=fps)
 
@@ -124,6 +132,11 @@ def draw():
                        width=2)
     if options.debug:
         canvas.create_text(145, 40, text="{}".format(camera))
+    print("draw time = {}".format(time.time() - b_draw))
+
+    frames += 1
+
+    print("full draw time = {}\n---------------------------------".format(time.time() - b_draw))
 
     canvas.after(ms=1, func=draw)
 

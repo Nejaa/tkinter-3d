@@ -6,7 +6,7 @@ class Options:
         self.debug = False
         self.draw_fps = True
         self.tickRate = 150
-        self.refreshRate = 60
+        self.refreshRate = 120
         self.width = 800
         self.height = 600
         self.originOffset = 1000
