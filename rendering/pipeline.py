@@ -1,21 +1,29 @@
+from queue import Queue
+from threading import Thread
 from typing import List
 
 from rendering.pipeline_step import PipelineStep
 
 
-class EmptySteps(Exception):
-    def __init__(self):
-        super().__init__()
-
-
 class Pipeline:
-    def __init__(self, steps: List[PipelineStep]):
+    input_queue: Queue
+    output_queue = Queue(maxsize=2)
+
+    def __init__(self, steps: List[PipelineStep] = []):
+        self.input_queue = self.output_queue
         if len(steps) == 0:
-            raise EmptySteps()
+            return
         self.steps = steps
 
         for idx in range(len(steps)):
+            step = steps[idx]
             if idx == 0:
-                self.input_queue = steps[0].input_queue
+                self.input_queue = step.input_queue
             else:
-                steps[idx - 1].output_queue = steps[idx].input_queue
+                steps[idx - 1].output_queue = step.input_queue
+                step.output_queue = self.output_queue
+            step.start()
+
+    def stop(self):
+        for step in self.steps:
+            step.stop()

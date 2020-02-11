@@ -11,6 +11,9 @@ from geometry.camera import Camera
 from geometry.quaternion import Quaternion
 from geometry.vector import Vector
 from options import options
+from rendering.collectorStep import CollectorStep
+from rendering.pipeline import Pipeline
+from scene.entity import Entity
 from shape.cube import Cube
 from shape.plane import Plane
 
@@ -37,6 +40,7 @@ meshes = [
     # Cube(cube_size=cubeSize / 2, origin=Vector(z=-(cubeSize + cubeSize / 2))),
 ]
 [m.translate(origin) for m in meshes]
+entities = [Entity(geometry=m) for m in meshes]
 rot_speed = 180 / options.tickRate  # deg/s = rot speed/tick
 cube_rot_axis = Vector(x=random(), y=random(), z=random())
 point2 = cube_rot_axis.copy() * 100
@@ -60,6 +64,10 @@ camera_speed = 1
 
 frames = 0
 fps = 0
+
+pipeline = Pipeline(steps=[
+    CollectorStep(),
+])
 
 tl = Timeloop()
 
@@ -92,6 +100,11 @@ def draw():
     if updating_view:
         canvas.after(ms=1, func=draw)
         return
+
+    # scene = pipeline.output_queue.get(block=True, timeout=None)
+    #
+    # entities = scene.entities()
+    # meshes = [entity.geometry for entity in entities]
 
     drawing = True
     canvas.delete("all")
@@ -220,3 +233,4 @@ tk.bind(sequence="f", func=toggle_fps)
 tl.start()
 tk.after(ms=100, func=draw)
 tk.mainloop()
+pipeline.stop()
