@@ -103,19 +103,16 @@ def draw():
     if options.draw_fps:
         canvas.create_text(20, 10, text=fps)
 
-    h_width = options.width / 2
-    h_height = options.height / 2
-    canvas.create_line(h_width, h_height - options.cross_hair_scale,
-                       h_width, h_height + options.cross_hair_scale,
+    canvas.create_line(windowCenter.x, windowCenter.y - options.cross_hair_scale,
+                       windowCenter.x, windowCenter.y + options.cross_hair_scale,
                        width=2)
-    canvas.create_line(h_width - options.cross_hair_scale, h_height,
-                       h_width + options.cross_hair_scale, h_height,
+    canvas.create_line(windowCenter.x - options.cross_hair_scale, windowCenter.y,
+                       windowCenter.x + options.cross_hair_scale, windowCenter.y,
                        width=2)
     if options.debug:
         canvas.create_text(145, 40, text="{}".format(camera))
 
     canvas.after(ms=1, func=draw)
-
 
 
 @tl.job(interval=timedelta(milliseconds=options.tick_delay))
@@ -149,6 +146,34 @@ def rotate_camera(axis: Vector, angle: float):
     return mover
 
 
+previous_position = None
+
+
+def follow_mouse(event: Event):
+    global previous_position
+
+    x = event.x
+    y = event.y
+
+    if (windowCenter.x == x) & (windowCenter.y == y):
+        return
+
+    x_off = x - windowCenter.x
+    y_off = y - windowCenter.y
+
+    if x_off < 0:
+        view_left(event)
+    elif x_off > 0:
+        view_right(event)
+
+    if y_off < 0:
+        view_up(event)
+    elif y_off > 0:
+        view_down(event)
+
+    tk.event_generate('<Motion>', warp=True, x=windowCenter.x, y=windowCenter.y)
+
+
 def adjust_viewport(amount: float):
     def mover(_: Event):
         camera.view_port.translate(Vector(z=amount))
@@ -164,7 +189,13 @@ def toggle_fps(_: Event):
     options.draw_fps = not options.draw_fps
 
 
+view_up = rotate_camera(axis=Vector(x=1), angle=-camera_speed)
+view_down = rotate_camera(axis=Vector(x=1), angle=camera_speed)
+view_left = rotate_camera(axis=Vector(y=1), angle=-camera_speed)
+view_right = rotate_camera(axis=Vector(y=1), angle=camera_speed)
+
 tk = Tk()
+tk.config(cursor="none")
 canvas = Canvas(tk, width=options.width, height=options.height)
 canvas.pack()
 
@@ -172,16 +203,17 @@ tk.bind(sequence="z", func=move_camera(Vector(z=camera_speed)))
 tk.bind(sequence="s", func=move_camera(Vector(z=-camera_speed)))
 tk.bind(sequence="q", func=move_camera(Vector(x=-camera_speed)))
 tk.bind(sequence="d", func=move_camera(Vector(x=camera_speed)))
-tk.bind(sequence="<Left>", func=rotate_camera(axis=Vector(y=1), angle=-camera_speed))
-tk.bind(sequence="<Right>", func=rotate_camera(axis=Vector(y=1), angle=camera_speed))
-tk.bind(sequence="<Up>", func=rotate_camera(axis=Vector(x=1), angle=-camera_speed))
-tk.bind(sequence="<Down>", func=rotate_camera(axis=Vector(x=1), angle=camera_speed))
+tk.bind(sequence="<Left>", func=view_left)
+tk.bind(sequence="<Right>", func=view_right)
+tk.bind(sequence="<Up>", func=view_up)
+tk.bind(sequence="<Down>", func=view_down)
 tk.bind(sequence="a", func=rotate_camera(axis=Vector(z=1), angle=camera_speed))
 tk.bind(sequence="e", func=rotate_camera(axis=Vector(z=1), angle=-camera_speed))
 tk.bind(sequence="<space>", func=move_camera(Vector(y=camera_speed)))
 tk.bind(sequence="<Shift_L>", func=move_camera(Vector(y=-camera_speed)))
 tk.bind(sequence="<Prior>", func=adjust_viewport(camera_speed))
 tk.bind(sequence="<Next>", func=adjust_viewport(-camera_speed))
+tk.bind(sequence="<Motion>", func=follow_mouse)
 tk.bind(sequence="i", func=toggle_info)
 tk.bind(sequence="f", func=toggle_fps)
 
