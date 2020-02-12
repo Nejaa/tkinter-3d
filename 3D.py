@@ -34,12 +34,12 @@ meshes = [
     plane.copy().rotate(rotation=Quaternion.axis_angle(Vector(x=1), angle=-90)),
     plane.copy().rotate(rotation=Quaternion.axis_angle(Vector(y=1), angle=90)),
     cube,
-    Cube(cube_size=cubeSize / 2, origin=Vector(y=(cubeSize + cubeSize / 2))),
-    Cube(cube_size=cubeSize / 2, origin=Vector(y=-(cubeSize + cubeSize / 2))),
-    Cube(cube_size=cubeSize / 2, origin=Vector(x=(cubeSize + cubeSize / 2))),
-    Cube(cube_size=cubeSize / 2, origin=Vector(x=-(cubeSize + cubeSize / 2))),
-    Cube(cube_size=cubeSize / 2, origin=Vector(z=(cubeSize + cubeSize / 2))),
-    Cube(cube_size=cubeSize / 2, origin=Vector(z=-(cubeSize + cubeSize / 2))),
+    # Cube(cube_size=cubeSize / 2, origin=Vector(y=(cubeSize + cubeSize / 2))),
+    # Cube(cube_size=cubeSize / 2, origin=Vector(y=-(cubeSize + cubeSize / 2))),
+    # Cube(cube_size=cubeSize / 2, origin=Vector(x=(cubeSize + cubeSize / 2))),
+    # Cube(cube_size=cubeSize / 2, origin=Vector(x=-(cubeSize + cubeSize / 2))),
+    # Cube(cube_size=cubeSize / 2, origin=Vector(z=(cubeSize + cubeSize / 2))),
+    # Cube(cube_size=cubeSize / 2, origin=Vector(z=-(cubeSize + cubeSize / 2))),
 ]
 [m.translate(origin) for m in meshes]
 entities = [Entity(geometry=m) for m in meshes]
@@ -189,16 +189,19 @@ def follow_mouse(event: Event):
     axis = Vector()
 
     if x_off < 0:
+        camera.rotate(Vector(y=-1), camera_speed, True)
         axis.y = -1
     elif x_off > 0:
+        camera.rotate(Vector(y=1), camera_speed, True)
         axis.y = 1
 
     if y_off < 0:
+        camera.rotate(Vector(x=-1), camera_speed)
         axis.x = -1
     elif y_off > 0:
+        camera.rotate(Vector(x=1), camera_speed)
         axis.x = 1
 
-    camera.rotate(axis, camera_speed)
 
     tk.event_generate('<Motion>', warp=True, x=windowCenter.x, y=windowCenter.y)
 

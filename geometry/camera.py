@@ -18,9 +18,20 @@ class Camera:
 
         self.position.translate(v)
 
-    def rotate(self, axis: Vector, angle: float):
+    def rotate(self, axis: Vector, angle: float, global_rotation: bool = False):
         rot = Quaternion.axis_angle(axis=axis, angle=angle)
-        self.rotation *= rot
+
+        if global_rotation:
+            self.rotation = rot * self.rotation
+        else:
+            self.rotation = self.rotation * rot
+
+        # roll_deviation = self.rotation.euler_angles().z
+        #
+        # roll_correction = Quaternion.axis_angle(axis=Vector(z=-1), angle=roll_deviation)
+        #
+        # self.rotation *= roll_correction
+
         self.bearing.projection.move_to(self.rotation.rotate(self.bearing))
 
     def project(self, point: Vector, mesh_position: Vector):
@@ -35,7 +46,7 @@ class Camera:
         delta = point + mesh_position - self.position
 
         dot = delta.dot(self.bearing.projection)
-        if dot <= 1:
+        if dot <= 0:
             point.visible = False
             return
 
@@ -43,8 +54,8 @@ class Camera:
         d_y = sx * (cy * delta.z + sy * (sz * delta.y + cz * delta.x)) + cx * (cz * delta.y - sz * delta.x)
         d_z = cx * (cy * delta.z + sy * (sz * delta.y + cz * delta.x)) - sx * (cz * delta.y - sz * delta.x)
 
-        x = (self.view_port.z / d_z) * d_x
-        y = (self.view_port.z / d_z) * d_y
+        x = (self.view_port.z / d_z) * d_x + self.view_port.x
+        y = (self.view_port.z / d_z) * d_y + self.view_port.y
 
         point.projection = Vector(point.label, x, -y)  # reverse y as the screen origin is top left
         point.projection.d = dot
