@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 from datetime import timedelta
+from math import sqrt
 from random import random
 from tkinter import Tk, Canvas, Event
 import time
@@ -26,7 +27,7 @@ windowCenter = Vector(x=options.width / 2, y=options.height / 2, z=0)
 origin = Vector(x=options.originOffset, y=options.originOffset, z=options.originOffset)
 
 cubeSize = 20
-plane = Plane(length=2, grid_size=60.0)
+plane = Plane(length=4, grid_size=20.0)
 plane.translate(Vector(x=-cubeSize, y=-cubeSize, z=cubeSize))
 cube = Cube(cube_size=cubeSize)
 meshes = [
@@ -65,8 +66,8 @@ rotationSpeeds = [
 ]
 
 camera_origin = cube.center + Vector(z=-cubeSize * 4)
-camera = Camera(position=camera_origin, focal_length=500)
-camera_speed = 1
+camera = Camera(position=camera_origin, focal_length=500, viewport_offset=windowCenter)
+camera_speed = 1.5
 
 frames = 0
 fps = 0
@@ -86,7 +87,6 @@ def update_view():
 
     for idx, mesh in enumerate(mhs):
         mesh.project_to(camera=camera)
-        mesh.translate_projections(windowCenter)
 
     pipeline.push_scene(scene=local_scene)
 
@@ -101,7 +101,7 @@ def draw():
     new_scene = pipeline.pull_scene()
     if new_scene is not None:
         last_scene = new_scene
-    print("pull time = {:.6}ms".format((time.time() - b_pull)*1000))
+    # print("pull time = {:.6}ms".format((time.time() - b_pull) * 1000))
 
     if last_scene is None:
         canvas.after(ms=10, func=draw)
@@ -109,7 +109,7 @@ def draw():
 
     b_extract = time.time()
     msh = [entity.geometry for entity in last_scene.entities()]
-    print("extract time = {:.6}ms".format((time.time() - b_extract)*1000))
+    # print("extract time = {:.6}ms".format((time.time() - b_extract) * 1000))
 
     canvas.delete("all")
 
@@ -118,7 +118,7 @@ def draw():
     for mesh in msh:
         m_draw = time.time()
         mesh.draw(canvas, options.debug)
-        print("mesh draw time = {:.6}ms".format((time.time() - m_draw) * 1000))
+        # print("mesh draw time = {:.6}ms".format((time.time() - m_draw) * 1000))
 
     if options.draw_fps:
         canvas.create_text(20, 10, text=fps)
@@ -131,11 +131,11 @@ def draw():
                        width=2)
     if options.debug:
         canvas.create_text(145, 40, text="{}".format(camera))
-    print("draw time = {:.6}ms".format((time.time() - b_draw)*1000))
+    # print("draw time = {:.6}ms".format((time.time() - b_draw) * 1000))
 
     frames += 1
 
-    print("full draw time = {:.6}ms\n---------------------------------".format((time.time() - b_draw)*1000))
+    # print("full draw time = {:.6}ms\n---------------------------------".format((time.time() - b_draw) * 1000))
 
     canvas.after(ms=1, func=draw)
 
@@ -173,35 +173,38 @@ def rotate_camera(axis: Vector, angle: float):
 
 previous_position = None
 
+mouse_deadzone = 10
+
 
 def follow_mouse(event: Event):
     global previous_position
 
-    x = event.x
-    y = event.y
+    move = Vector(x=event.x, y=event.y)
 
-    if (windowCenter.x == x) & (windowCenter.y == y):
+    if move.is_same(windowCenter):
         return
 
-    x_off = x - windowCenter.x
-    y_off = y - windowCenter.y
+    offset = move - windowCenter
+
+    if offset.magnitude() < mouse_deadzone:
+        return
+
+    offset = offset.normalize()
 
     axis = Vector()
-
-    if x_off < 0:
-        camera.rotate(Vector(y=-1), camera_speed, True)
+    if offset.x < 0:
+        camera.rotate(Vector(y=1), camera_speed * offset.x, True)
         axis.y = -1
-    elif x_off > 0:
-        camera.rotate(Vector(y=1), camera_speed, True)
+    elif offset.x > 0:
+        camera.rotate(Vector(y=1), camera_speed * offset.x, True)
         axis.y = 1
 
-    if y_off < 0:
-        camera.rotate(Vector(x=-1), camera_speed)
+    if offset.y < 0:
+        camera.rotate(Vector(x=1), camera_speed * offset.y)
         axis.x = -1
-    elif y_off > 0:
-        camera.rotate(Vector(x=1), camera_speed)
+    elif offset.y > 0:
+        camera.rotate(Vector(x=1), camera_speed * offset.y)
         axis.x = 1
-
 
     tk.event_generate('<Motion>', warp=True, x=windowCenter.x, y=windowCenter.y)
 

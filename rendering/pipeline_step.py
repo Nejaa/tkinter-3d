@@ -7,7 +7,7 @@ from scene.scene import Scene
 
 
 class PipelineStep(ABC, Thread):
-    input_queue = Queue(maxsize=2)
+    input_queue = Queue(maxsize=1)
     output_queue: Queue = None
     running: bool = False
 

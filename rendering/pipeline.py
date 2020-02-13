@@ -8,7 +8,7 @@ from scene.scene import Scene
 
 class Pipeline:
     input_queue: Queue
-    output_queue = Queue(maxsize=2)
+    output_queue = Queue(maxsize=1)
 
     def __init__(self, steps: List[PipelineStep] = []):
         self.input_queue = self.output_queue

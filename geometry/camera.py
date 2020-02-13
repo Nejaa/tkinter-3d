@@ -5,12 +5,13 @@ from geometry.vector import Vector
 
 
 class Camera:
-    def __init__(self, position: Vector, focal_length: float = 500):
+    def __init__(self, position: Vector = Vector(), focal_length: float = 500, viewport_offset: Vector = Vector()):
         self.position = position.copy(label="camera")
         self.rotation = Quaternion.identity()
         self.bearing = Vector(z=1)
         self.bearing.projection = Vector(z=1)
-        self.view_port = Vector(label="view_port", z=focal_length)
+        self.view_port = viewport_offset.copy(label="view_port")
+        self.view_port.z = focal_length
 
     def translate(self, v: Vector, global_movement: bool = False):
         if not global_movement:
@@ -25,12 +26,6 @@ class Camera:
             self.rotation = rot * self.rotation
         else:
             self.rotation = self.rotation * rot
-
-        # roll_deviation = self.rotation.euler_angles().z
-        #
-        # roll_correction = Quaternion.axis_angle(axis=Vector(z=-1), angle=roll_deviation)
-        #
-        # self.rotation *= roll_correction
 
         self.bearing.projection.move_to(self.rotation.rotate(self.bearing))
 
@@ -55,9 +50,9 @@ class Camera:
         d_z = cx * (cy * delta.z + sy * (sz * delta.y + cz * delta.x)) - sx * (cz * delta.y - sz * delta.x)
 
         x = (self.view_port.z / d_z) * d_x + self.view_port.x
-        y = (self.view_port.z / d_z) * d_y + self.view_port.y
+        y = (-(self.view_port.z / d_z) * d_y) + self.view_port.y
 
-        point.projection = Vector(point.label, x, -y)  # reverse y as the screen origin is top left
+        point.projection = Vector(point.label, x, y)  # reverse y as the screen origin is top left
         point.projection.d = dot
         point.visible = True
 

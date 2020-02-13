@@ -26,7 +26,7 @@ class Vector:
 
     def draw(self, canvas: Canvas):
         canvas.create_text(self.projection.x, self.projection.y, text=self.label)
-        canvas.create_text(self.projection.x, self.projection.y+10, text="{:.2}".format(self.projection.d))
+        canvas.create_text(self.projection.x, self.projection.y + 10, text="{:.2}".format(self.projection.d))
 
     def dot(self, other: Vector) -> float:
         return self.x * other.x + self.y * other.y + self.z * other.z
@@ -79,3 +79,6 @@ class Vector:
 
     def __str__(self) -> str:
         return "({:.2f}, {:.2f}, {:.2f})".format(self.x, self.y, self.z)
+
+    def is_same(self, other: Vector) -> bool:
+        return self.x == other.x and self.y == other.y and self.z == other.z
