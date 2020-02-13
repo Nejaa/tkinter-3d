@@ -10,6 +10,7 @@ from timeloop import Timeloop
 
 from geometry import geometry_options
 from geometry.camera import Camera
+from geometry.mesh import Mesh
 from geometry.quaternion import Quaternion
 from geometry.vector import Vector
 from options import options
@@ -26,15 +27,20 @@ windowCenter = Vector(x=options.width / 2, y=options.height / 2, z=0)
 
 origin = Vector(x=options.originOffset, y=options.originOffset, z=options.originOffset)
 
+m = Mesh().import_from("ressources/Cube.obj")
+m.scale(40)
+
 cubeSize = 20
 plane = Plane(length=4, grid_size=20.0)
 plane.translate(Vector(x=-cubeSize, y=-cubeSize, z=cubeSize))
 cube = Cube(cube_size=cubeSize)
 meshes = [
-    plane,
-    plane.copy().rotate(rotation=Quaternion.axis_angle(Vector(x=1), angle=-90)),
-    plane.copy().rotate(rotation=Quaternion.axis_angle(Vector(y=1), angle=90)),
     cube,
+    m
+    # plane,
+    # plane.copy().rotate(rotation=Quaternion.axis_angle(Vector(x=1), angle=-90)),
+    # plane.copy().rotate(rotation=Quaternion.axis_angle(Vector(y=1), angle=90)),
+    # cube,
     # Cube(cube_size=cubeSize / 2, origin=Vector(y=(cubeSize + cubeSize / 2))),
     # Cube(cube_size=cubeSize / 2, origin=Vector(y=-(cubeSize + cubeSize / 2))),
     # Cube(cube_size=cubeSize / 2, origin=Vector(x=(cubeSize + cubeSize / 2))),
@@ -53,12 +59,12 @@ cube_rot_axis = Vector(x=random(), y=random(), z=random())
 point2 = cube_rot_axis.copy() * 100
 point1 = -point2
 rotationSpeeds = [
-    None,
-    None,
-    None,
-    Quaternion.axis_angle(cube_rot_axis, angle=rot_speed),
-    # Quaternion.axis_angle(Vector(x=1), angle=-rot_speed),
-    # Quaternion.axis_angle(Vector(x=1), angle=rot_speed),
+    # None,
+    # None,
+    # None,
+    # Quaternion.axis_angle(cube_rot_axis, angle=rot_speed),
+    Quaternion.axis_angle(Vector(x=1), angle=-rot_speed),
+    Quaternion.axis_angle(Vector(x=1), angle=rot_speed),
     # Quaternion.axis_angle(Vector(y=1), angle=rot_speed),
     # Quaternion.axis_angle(Vector(y=1), angle=-rot_speed),
     # Quaternion.axis_angle(Vector(z=1), angle=rot_speed),

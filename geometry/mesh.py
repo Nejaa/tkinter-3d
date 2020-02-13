@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from tkinter import Canvas
 
 from geometry.Triangle import Triangle
@@ -9,16 +10,16 @@ from geometry.vector import Vector
 
 
 class Mesh:
-    def __init__(self, *vertices: Vector):
-        assert (len(vertices) % 3 == 0), "incorrect number of points for triangles"
+    def __init__(self, *triangles: Vector):
+        assert (len(triangles) % 3 == 0), "incorrect number of points for triangles"
 
         self.rotation = Vector()
         self.center = Vector()
         self.viewportPosition = Vector()
-        self.vertices = vertices
+        self.vertices = triangles
         self.triangles = []
         i = 0
-        while i < len(vertices):
+        while i < len(triangles):
             self.triangles.append(Triangle(self.vertices[i], self.vertices[i + 1], self.vertices[i + 2]))
             i += 3
 
@@ -56,6 +57,16 @@ class Mesh:
             seen.append(vertex)
         return self
 
+    def scale(self, scale_factor: float) -> Mesh:
+        seen = []
+        for vertex in self.vertices:
+            if vertex in seen:
+                continue
+            v = vertex * scale_factor
+            vertex.move_to(v)
+            seen.append(vertex)
+        return self
+
     def project_to(self, camera: Camera):
         seen = []
         for vertex in self.vertices:
@@ -72,3 +83,35 @@ class Mesh:
         m.set_center(self.center.copy())
         m.translate(offset)
         return m
+
+    @staticmethod
+    def import_from(file_path: str) -> Mesh:
+        f = open(file_path, "r")
+
+        vertex_regex = re.compile("v\\s(-?[.0-9]+)\\s(-?[.0-9]+)\\s(-?[.0-9]+)")
+        triangle_regex = re.compile("f\\s(\\d+)\\s(\\d+)\\s(\\d+)")
+
+        vertices = []
+        triangles = []
+        lines = f.readlines()
+        for line in lines:
+            line_type = line[0]
+            if line_type == "#":
+                continue  # line is comment
+            elif line_type == "o":
+                pass  # mesh name ignored
+            elif line_type == "v":
+                groups = vertex_regex.search(line).groups()
+                vertex = Vector(x=float(groups[0]), y=float(groups[1]), z=float(groups[2]))
+                vertices.append(vertex)
+            elif line_type == "s":
+                pass  # Smooth shading ignored
+            elif line_type == "f":
+                groups = triangle_regex.search(line).groups()
+                triangles.append(vertices[int(groups[0])-1])
+                triangles.append(vertices[int(groups[1])-1])
+                triangles.append(vertices[int(groups[2])-1])
+            else:
+                print("ignored unknown format line {}".format(line))
+
+        return Mesh(*triangles)
