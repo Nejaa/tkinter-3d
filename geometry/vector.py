@@ -26,7 +26,7 @@ class Vector:
 
     def draw(self, canvas: Canvas):
         canvas.create_text(self.projection.x, self.projection.y, text=self.label)
-        canvas.create_text(self.projection.x, self.projection.y + 10, text="{:.2}".format(self.projection.d))
+        canvas.create_text(self.projection.x, self.projection.y + 10, text="{:.2}".format(float(self.projection.d)))
 
     def dot(self, other: Vector) -> float:
         return self.x * other.x + self.y * other.y + self.z * other.z

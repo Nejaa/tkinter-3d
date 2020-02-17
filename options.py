@@ -1,14 +1,11 @@
-from typing import List
-
-
 class Options:
     def __init__(self):
         self.debug = False
-        self.draw_fps = True
+        self.__draw_fps = True
         self.tickRate = 200
         self.refreshRate = 120
-        self.width = 800
-        self.height = 600
+        self.width = 1200
+        self.height = 1000
         self.originOffset = 1000
         self.cross_hair_scale = 10
         self.global_movement = False
@@ -23,7 +20,7 @@ class Options:
 
     @property
     def draw_fps(self):
-        return self.__draw_fps | self.debug
+        return self.__draw_fps or self.debug
 
     @draw_fps.setter
     def draw_fps(self, draw_fps: bool):

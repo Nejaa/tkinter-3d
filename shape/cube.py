@@ -10,9 +10,7 @@ class Cube(Mesh):
             z=cube_size / 2,
         )
 
-        # o = origin - center
-
-        base_vertices = {
+        vertices = {
             "A": Vector("A", 0, 0, 0) - center,
             "B": Vector("B", 0, cube_size, 0) - center,
             "C": Vector("C", cube_size, cube_size, 0) - center,
@@ -23,55 +21,55 @@ class Cube(Mesh):
             "H": Vector("H", cube_size, 0, cube_size) - center,
         }
 
-        vertices = [
-            base_vertices["A"],
-            base_vertices["B"],
-            base_vertices["D"],
+        triangles = [
+            vertices["A"],
+            vertices["B"],
+            vertices["D"],
 
-            base_vertices["B"],
-            base_vertices["C"],
-            base_vertices["D"],
+            vertices["B"],
+            vertices["C"],
+            vertices["D"],
 
-            base_vertices["D"],
-            base_vertices["C"],
-            base_vertices["H"],
+            vertices["D"],
+            vertices["C"],
+            vertices["H"],
 
-            base_vertices["C"],
-            base_vertices["G"],
-            base_vertices["H"],
+            vertices["C"],
+            vertices["G"],
+            vertices["H"],
 
-            base_vertices["H"],
-            base_vertices["G"],
-            base_vertices["E"],
+            vertices["H"],
+            vertices["G"],
+            vertices["E"],
 
-            base_vertices["G"],
-            base_vertices["F"],
-            base_vertices["E"],
+            vertices["G"],
+            vertices["F"],
+            vertices["E"],
 
-            base_vertices["E"],
-            base_vertices["F"],
-            base_vertices["A"],
+            vertices["E"],
+            vertices["F"],
+            vertices["A"],
 
-            base_vertices["F"],
-            base_vertices["B"],
-            base_vertices["A"],
+            vertices["F"],
+            vertices["B"],
+            vertices["A"],
 
-            base_vertices["E"],
-            base_vertices["A"],
-            base_vertices["H"],
+            vertices["E"],
+            vertices["A"],
+            vertices["H"],
 
-            base_vertices["A"],
-            base_vertices["D"],
-            base_vertices["H"],
+            vertices["A"],
+            vertices["D"],
+            vertices["H"],
 
-            base_vertices["B"],
-            base_vertices["F"],
-            base_vertices["C"],
+            vertices["B"],
+            vertices["F"],
+            vertices["C"],
 
-            base_vertices["F"],
-            base_vertices["G"],
-            base_vertices["C"],
+            vertices["F"],
+            vertices["G"],
+            vertices["C"],
         ]
 
-        super().__init__(*vertices)
+        super().__init__(*triangles)
         self.set_center(origin)

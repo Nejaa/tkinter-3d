@@ -27,19 +27,19 @@ windowCenter = Vector(x=options.width / 2, y=options.height / 2, z=0)
 
 origin = Vector(x=options.originOffset, y=options.originOffset, z=options.originOffset)
 
-m = Mesh().import_from("ressources/Cube.obj")
-m.scale(40)
-
+m = Mesh().import_from("ressources/Cylinder.obj")
+m.scale(20)
+m.rotate(rotation=Quaternion.axis_angle(Vector(y=1), 180))
 cubeSize = 20
 plane = Plane(length=4, grid_size=20.0)
 plane.translate(Vector(x=-cubeSize, y=-cubeSize, z=cubeSize))
 cube = Cube(cube_size=cubeSize)
 meshes = [
     cube,
-    m
-    # plane,
-    # plane.copy().rotate(rotation=Quaternion.axis_angle(Vector(x=1), angle=-90)),
-    # plane.copy().rotate(rotation=Quaternion.axis_angle(Vector(y=1), angle=90)),
+    m,
+    plane,
+    plane.copy().rotate(rotation=Quaternion.axis_angle(Vector(x=1), angle=-90)),
+    plane.copy().rotate(rotation=Quaternion.axis_angle(Vector(y=1), angle=90)),
     # cube,
     # Cube(cube_size=cubeSize / 2, origin=Vector(y=(cubeSize + cubeSize / 2))),
     # Cube(cube_size=cubeSize / 2, origin=Vector(y=-(cubeSize + cubeSize / 2))),
@@ -50,6 +50,7 @@ meshes = [
 ]
 [m.translate(origin) for m in meshes]
 entities = [Entity(geometry=m) for m in meshes]
+m.translate(Vector(x=cubeSize*2))
 
 scene = Scene()
 [scene.scene_root.add_entity(e) for e in entities]
@@ -63,8 +64,8 @@ rotationSpeeds = [
     # None,
     # None,
     # Quaternion.axis_angle(cube_rot_axis, angle=rot_speed),
-    Quaternion.axis_angle(Vector(x=1), angle=-rot_speed),
-    Quaternion.axis_angle(Vector(x=1), angle=rot_speed),
+    # Quaternion.axis_angle(Vector(x=1), angle=-rot_speed),
+    # Quaternion.axis_angle(Vector(x=1), angle=rot_speed),
     # Quaternion.axis_angle(Vector(y=1), angle=rot_speed),
     # Quaternion.axis_angle(Vector(y=1), angle=-rot_speed),
     # Quaternion.axis_angle(Vector(z=1), angle=rot_speed),
@@ -240,15 +241,15 @@ tk.config(cursor="none")
 canvas = Canvas(tk, width=options.width, height=options.height)
 canvas.pack()
 
-tk.bind(sequence="z", func=move_camera(Vector(z=camera_speed)))
+tk.bind(sequence="w", func=move_camera(Vector(z=camera_speed)))
 tk.bind(sequence="s", func=move_camera(Vector(z=-camera_speed)))
-tk.bind(sequence="q", func=move_camera(Vector(x=-camera_speed)))
+tk.bind(sequence="a", func=move_camera(Vector(x=-camera_speed)))
 tk.bind(sequence="d", func=move_camera(Vector(x=camera_speed)))
 tk.bind(sequence="<Left>", func=view_left)
 tk.bind(sequence="<Right>", func=view_right)
 tk.bind(sequence="<Up>", func=view_up)
 tk.bind(sequence="<Down>", func=view_down)
-tk.bind(sequence="a", func=rotate_camera(axis=Vector(z=1), angle=camera_speed))
+tk.bind(sequence="q", func=rotate_camera(axis=Vector(z=1), angle=camera_speed))
 tk.bind(sequence="e", func=rotate_camera(axis=Vector(z=1), angle=-camera_speed))
 tk.bind(sequence="<space>", func=move_camera(Vector(y=camera_speed)))
 tk.bind(sequence="<Shift_L>", func=move_camera(Vector(y=-camera_speed)))

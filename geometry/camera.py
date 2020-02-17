@@ -12,6 +12,8 @@ class Camera:
         self.bearing.projection = Vector(z=1)
         self.view_port = viewport_offset.copy(label="view_port")
         self.view_port.z = focal_length
+        self.C = Vector(x=cos(0), y=cos(0), z=cos(0))
+        self.S = Vector(x=sin(0), y=sin(0), z=sin(0))
 
     def translate(self, v: Vector, global_movement: bool = False):
         if not global_movement:
@@ -23,20 +25,26 @@ class Camera:
         rot = Quaternion.axis_angle(axis=axis, angle=angle)
 
         if global_rotation:
-            self.rotation = rot * self.rotation
+            self.rotation = rot * self.rotation  # rotate over current camera rotation
         else:
-            self.rotation = self.rotation * rot
+            self.rotation = self.rotation * rot  # rotate under current camera rotation
 
+        self.update_data()
+
+    def update_data(self):
         self.bearing.projection.move_to(self.rotation.rotate(self.bearing))
+        euler = self.rotation.euler_angles()
+        self.C = Vector(x=cos(euler.x), y=cos(euler.y), z=cos(euler.z))
+        self.S = Vector(x=sin(euler.x), y=sin(euler.y), z=sin(euler.z))
 
     def project(self, point: Vector, mesh_position: Vector):
-        euler = self.rotation.euler_angles()
-        cx = cos(euler.x)
-        sx = sin(euler.x)
-        cy = cos(euler.y)
-        sy = sin(euler.y)
-        cz = cos(euler.z)
-        sz = sin(euler.z)
+        cx = self.C.x
+        cy = self.C.y
+        cz = self.C.z
+
+        sx = self.S.x
+        sy = self.S.y
+        sz = self.S.z
 
         delta = point + mesh_position - self.position
 
@@ -50,9 +58,9 @@ class Camera:
         d_z = cx * (cy * delta.z + sy * (sz * delta.y + cz * delta.x)) - sx * (cz * delta.y - sz * delta.x)
 
         x = (self.view_port.z / d_z) * d_x + self.view_port.x
-        y = (-(self.view_port.z / d_z) * d_y) + self.view_port.y
+        y = (-(self.view_port.z / d_z) * d_y) + self.view_port.y # reverse y as the screen origin is top left
 
-        point.projection = Vector(point.label, x, y)  # reverse y as the screen origin is top left
+        point.projection = Vector(point.label, x, y)
         point.projection.d = dot
         point.visible = True
 
