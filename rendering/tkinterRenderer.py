@@ -16,7 +16,10 @@ class TkinterRenderer(Canvas, Renderer):
         Canvas.__init__(self, root, width=width, height=height, **kwargs)
         self.pack()
 
+        self.width = width
+        self.height = height
         self.windowCenter = Vector3D(x=width / 2, y=height / 2)
+
         self.frames = 0
         self.fps = 0
 
@@ -27,6 +30,7 @@ class TkinterRenderer(Canvas, Renderer):
     def draw(self):
         if self.newScene is not None:
             self.curScene = self.newScene
+            self.newScene = None
 
         if self.curScene is None:
             self.after(ms=10, func=self.draw)
@@ -48,10 +52,10 @@ class TkinterRenderer(Canvas, Renderer):
                                  triangle.ca.b.x, triangle.ca.b.y,
                                  width=geometry_options.line_thickness)
             if options.debug:
-                self.create_text(mesh.viewportPosition.projection.x, mesh.viewportPosition.projection.y,
+                self.create_text(mesh.viewportPosition.x, mesh.viewportPosition.y,
                                  text="Center = {}\nRotation = {}".format(mesh.center, mesh.rotation))
                 for vertex in mesh.vertices:
-                    self.create_text(vertex.projection.x, vertex.projection.y, text=vertex.label)
+                    self.create_text(vertex.x, vertex.y, text=vertex.label)
 
         if options.draw_fps:
             self.create_text(20, 10, text=self.fps)

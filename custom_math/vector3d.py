@@ -82,3 +82,33 @@ class Vector3D:
 
     def is_same(self, other: Vector3D) -> bool:
         return self.x == other.x and self.y == other.y and self.z == other.z
+
+    @staticmethod
+    def up(screen_space=False) -> Vector3D:
+        v = Vector3D(y=1)
+        if screen_space:
+            v = Vector3D(y=-1)
+        return v
+
+    @staticmethod
+    def down(screen_space=False) -> Vector3D:
+        v = Vector3D(y=-1)
+        if screen_space:
+            v = Vector3D(y=1)
+        return v
+
+    @staticmethod
+    def left() -> Vector3D:
+        return Vector3D(x=-1)
+
+    @staticmethod
+    def right() -> Vector3D:
+        return Vector3D(x=1)
+
+    @staticmethod
+    def forward() -> Vector3D:
+        return Vector3D(z=1)
+
+    @staticmethod
+    def backward() -> Vector3D:
+        return Vector3D(z=-1)

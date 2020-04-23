@@ -7,12 +7,13 @@ from scene.scene import Scene
 
 
 class PipelineStep(ABC, Thread):
-    input_queue = Queue(maxsize=1)
+    input_queue: Queue = None
     output_queue: Queue = None
     running: bool = False
 
     def __init__(self):
         super().__init__()
+        self.input_queue = Queue(maxsize=1)
 
     def fetch_scene(self) -> Scene:
         scene = None

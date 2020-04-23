@@ -14,7 +14,9 @@ from custom_math.vector3d import Vector3D
 from options import options
 from rendering.collectorStep import CollectorStep
 from rendering.pipeline import Pipeline
+from rendering.projectionStep import ProjectionStep
 from rendering.renderingStep import RenderingStep
+from rendering.screenClippingStep import ScreenClippingStep
 from rendering.tkinterRenderer import TkinterRenderer
 from scene.entity import Entity
 from scene.scene import Scene
@@ -31,7 +33,7 @@ tk = Tk()
 tk.config(cursor="none")
 renderer = TkinterRenderer(tk, width=options.width, height=options.height)
 
-m = Mesh().import_from("ressources/Cylinder.obj")
+m = Mesh.import_from("ressources/Cylinder.obj")
 m.scale(20)
 m.rotate(rotation=Quaternion.axis_angle(Vector3D(y=1), 180))
 cubeSize = 20
@@ -40,7 +42,7 @@ plane.translate(Vector3D(x=-cubeSize, y=-cubeSize, z=cubeSize))
 cube = Cube(cube_size=cubeSize)
 meshes = [
     cube,
-    m,
+    # m,
     plane,
     plane.copy().rotate(rotation=Quaternion.axis_angle(Vector3D(x=1), angle=-90)),
     plane.copy().rotate(rotation=Quaternion.axis_angle(Vector3D(y=1), angle=90)),
@@ -85,6 +87,8 @@ fps = 0
 
 pipeline = Pipeline(steps=[
     CollectorStep(),
+    ProjectionStep(camera=camera),
+    ScreenClippingStep(renderer=renderer),
     RenderingStep(renderer=renderer)
 ])
 
@@ -94,12 +98,6 @@ tl = Timeloop()
 @tl.job(interval=timedelta(milliseconds=options.refresh_delay / 2))
 def update_view():
     local_scene = scene.copy()
-    ent = local_scene.entities()
-    mhs = [entity.geometry for entity in ent]
-
-    for idx, mesh in enumerate(mhs):
-        mesh.project_to(camera=camera)
-
     pipeline.push_scene(scene=local_scene)
 
 
@@ -167,7 +165,7 @@ def follow_mouse(event: Event):
 
 def adjust_viewport(amount: float):
     def mover(_: Event):
-        camera.view_port.translate(Vector3D(z=amount))
+        camera.view_port = camera.view_port.translate(Vector3D(z=amount))
 
     return mover
 

@@ -1,3 +1,4 @@
+from geometry.triangle import Triangle
 from geometry.mesh import Mesh
 from custom_math.vector3d import Vector3D
 
@@ -22,53 +23,54 @@ class Cube(Mesh):
         }
 
         triangles = [
-            vertices["A"],
-            vertices["B"],
-            vertices["D"],
-
-            vertices["B"],
-            vertices["C"],
-            vertices["D"],
-
-            vertices["D"],
-            vertices["C"],
-            vertices["H"],
-
-            vertices["C"],
-            vertices["G"],
-            vertices["H"],
-
-            vertices["H"],
-            vertices["G"],
-            vertices["E"],
-
-            vertices["G"],
-            vertices["F"],
-            vertices["E"],
-
-            vertices["E"],
-            vertices["F"],
-            vertices["A"],
-
-            vertices["F"],
-            vertices["B"],
-            vertices["A"],
-
-            vertices["E"],
-            vertices["A"],
-            vertices["H"],
-
-            vertices["A"],
-            vertices["D"],
-            vertices["H"],
-
-            vertices["B"],
-            vertices["F"],
-            vertices["C"],
-
-            vertices["F"],
-            vertices["G"],
-            vertices["C"],
+            Triangle(a=vertices["A"],
+                     b=vertices["B"],
+                     c=vertices["D"],
+                     ),
+            Triangle(a=vertices["B"],
+                     b=vertices["C"],
+                     c=vertices["D"],
+                     ),
+            Triangle(a=vertices["D"],
+                     b=vertices["C"],
+                     c=vertices["H"],
+                     ),
+            Triangle(a=vertices["C"],
+                     b=vertices["G"],
+                     c=vertices["H"],
+                     ),
+            Triangle(a=vertices["H"],
+                     b=vertices["G"],
+                     c=vertices["E"],
+                     ),
+            Triangle(a=vertices["G"],
+                     b=vertices["F"],
+                     c=vertices["E"],
+                     ),
+            Triangle(a=vertices["E"],
+                     b=vertices["F"],
+                     c=vertices["A"],
+                     ),
+            Triangle(a=vertices["F"],
+                     b=vertices["B"],
+                     c=vertices["A"],
+                     ),
+            Triangle(a=vertices["E"],
+                     b=vertices["A"],
+                     c=vertices["H"],
+                     ),
+            Triangle(a=vertices["A"],
+                     b=vertices["D"],
+                     c=vertices["H"],
+                     ),
+            Triangle(a=vertices["B"],
+                     b=vertices["F"],
+                     c=vertices["C"],
+                     ),
+            Triangle(a=vertices["F"],
+                     b=vertices["G"],
+                     c=vertices["C"],
+                     ),
         ]
 
         super().__init__(*triangles)

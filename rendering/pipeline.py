@@ -11,9 +11,10 @@ class Pipeline:
     output_queue = Queue(maxsize=1)
 
     def __init__(self, steps: List[PipelineStep] = []):
-        self.input_queue = self.output_queue
         if len(steps) == 0:
+            self.input_queue = self.output_queue
             return
+
         self.steps = steps
 
         for idx in range(len(steps)):

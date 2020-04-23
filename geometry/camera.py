@@ -10,7 +10,7 @@ class Camera:
         self.position = position.copy(label="camera")
         self.rotation = Quaternion.identity()
         self.bearing = Vector3D(z=1)
-        self.bearing.projection = Vector3D(z=1)
+        self.globalBearing = Vector3D(z=1)
         self.view_port = viewport_offset.copy(label="view_port")
         self.view_port.z = focal_length
         self.C = Vector3D(x=cos(0), y=cos(0), z=cos(0))
@@ -20,7 +20,7 @@ class Camera:
         if not global_movement:
             v = self.rotation.rotate(v)
 
-        self.position.translate(v)
+        self.position = self.position.translate(v)
 
     def rotate(self, axis: Vector3D, angle: float, global_rotation: bool = False):
         rot = Quaternion.axis_angle(axis=axis, angle=angle)
@@ -33,13 +33,15 @@ class Camera:
         self.update_data()
 
     def update_data(self):
-        self.bearing.projection.move_to(self.rotation.rotate(self.bearing))
+        self.globalBearing.move_to(self.rotation.rotate(self.bearing))
         euler = self.rotation.euler_angles()
         self.C = Vector3D(x=cos(euler.x), y=cos(euler.y), z=cos(euler.z))
         self.S = Vector3D(x=sin(euler.x), y=sin(euler.y), z=sin(euler.z))
 
     def project_mesh(self, mesh: Mesh):
-
+        self.project(mesh.viewportPosition, mesh.center)
+        for vertex in mesh.vertices:
+            self.project(vertex, mesh.center)
 
     def project(self, point: Vector3D, mesh_position: Vector3D):
         cx = self.C.x
@@ -52,9 +54,8 @@ class Camera:
 
         delta = point + mesh_position - self.position
 
-        dot = delta.dot(self.bearing.projection)
+        dot = delta.dot(self.globalBearing)
         if dot <= 0:
-            point.visible = False
             return
 
         d_x = cy * (sz * delta.y + cz * delta.x) - sy * delta.z
@@ -64,9 +65,9 @@ class Camera:
         x = (self.view_port.z / d_z) * d_x + self.view_port.x
         y = (-(self.view_port.z / d_z) * d_y) + self.view_port.y # reverse y as the screen origin is top left
 
-        point.projection = Vector3D(point.label, x, y)
-        point.projection.d = dot
-        point.visible = True
+        point.x = x
+        point.y = y
+        point.z = d_z
 
     def __str__(self):
         euler_angles = self.rotation.euler_angles()
@@ -76,4 +77,4 @@ class Camera:
                "    rotation_euler={}\n" \
                "    bearing={}\n" \
                "    viewport offset={}".format(self.position, self.rotation, euler_angles.to_degree(),
-                                               self.bearing.projection, self.view_port)
+                                               self.globalBearing, self.view_port)

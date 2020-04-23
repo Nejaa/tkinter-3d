@@ -11,7 +11,5 @@ class ProjectionStep(PipelineStep):
     def process_scene(self, scene: Scene):
         ent = scene.entities()
         mhs = [entity.geometry for entity in ent]
-
         for idx, mesh in enumerate(mhs):
-            mesh.project_to(camera=self.camera)
-        pass
+            self.camera.project_mesh(mesh=mesh)
