@@ -14,15 +14,15 @@ class Plane(Mesh):
                 if x == 0:
                     continue  # skip first column
                 # first triangle
-                trianglesList.append(Triangle(a=vertices[y][x],
-                                              b=vertices[y][x - 1],
-                                              c=vertices[y + 1][x - 1],
+                trianglesList.append(Triangle(a=vertices[x - 1][y],
+                                              b=vertices[x][y],
+                                              c=vertices[x - 1][y + 1],
                                               )),
 
                 # second triangle
-                trianglesList.append(Triangle(a=vertices[y][x],
-                                              b=vertices[y + 1][x - 1],
-                                              c=vertices[y + 1][x],
+                trianglesList.append(Triangle(a=vertices[x][y],
+                                              b=vertices[x][y + 1],
+                                              c=vertices[x - 1][y + 1],
                                               ))
 
         super().__init__(*trianglesList)

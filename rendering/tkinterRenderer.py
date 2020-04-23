@@ -51,8 +51,14 @@ class TkinterRenderer(Canvas, Renderer):
                 self.create_line(triangle.ca.a.x, triangle.ca.a.y,
                                  triangle.ca.b.x, triangle.ca.b.y,
                                  width=geometry_options.line_thickness)
+                if options.debug and triangle.debugNormal is not None:
+                    self.create_line(triangle.center.x, triangle.center.y,
+                                     triangle.debugNormal.x, triangle.debugNormal.y,
+                                     width=geometry_options.line_thickness)
+
+
             if options.debug:
-                self.create_text(mesh.viewportPosition.x, mesh.viewportPosition.y,
+                self.create_text(mesh.center.x, mesh.center.y,
                                  text="Center = {}\nRotation = {}".format(mesh.center, mesh.rotation))
                 for vertex in mesh.vertices:
                     self.create_text(vertex.x, vertex.y, text=vertex.label)

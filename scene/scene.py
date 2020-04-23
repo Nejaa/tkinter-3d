@@ -28,3 +28,6 @@ class Scene:
         copy.scene_root = self.scene_root.copy()
 
         return copy
+
+    def build_global_positions(self):
+        self.scene_root.build_global_positions()

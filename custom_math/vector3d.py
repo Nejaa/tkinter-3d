@@ -27,7 +27,7 @@ class Vector3D:
     def cross(self, other: Vector3D) -> Vector3D:
         return Vector3D(
             x=self.y * other.z - self.z * other.y,
-            y=self.x * other.z - self.z * other.x,
+            y=self.z * other.x - self.x * other.z,
             z=self.x * other.y - self.y * other.x,
         )
 

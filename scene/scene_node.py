@@ -25,3 +25,7 @@ class SceneNode:
         [child.copy(copy) for child in self.childs]
 
         return copy
+
+    def build_global_positions(self):
+        [c.build_global_positions() for c in self.childs]
+        [e.build_global_positions() for e in self.entities]

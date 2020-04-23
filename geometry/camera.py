@@ -6,7 +6,8 @@ from geometry.mesh import Mesh
 
 
 class Camera:
-    def __init__(self, position: Vector3D = Vector3D(), focal_length: float = 500, viewport_offset: Vector3D = Vector3D()):
+    def __init__(self, position: Vector3D = Vector3D(), focal_length: float = 500,
+                 viewport_offset: Vector3D = Vector3D(), debug=False):
         self.position = position.copy(label="camera")
         self.rotation = Quaternion.identity()
         self.bearing = Vector3D(z=1)
@@ -15,6 +16,7 @@ class Camera:
         self.view_port.z = focal_length
         self.C = Vector3D(x=cos(0), y=cos(0), z=cos(0))
         self.S = Vector3D(x=sin(0), y=sin(0), z=sin(0))
+        self.debug = debug
 
     def translate(self, v: Vector3D, global_movement: bool = False):
         if not global_movement:
@@ -39,11 +41,20 @@ class Camera:
         self.S = Vector3D(x=sin(euler.x), y=sin(euler.y), z=sin(euler.z))
 
     def project_mesh(self, mesh: Mesh):
-        self.project(mesh.viewportPosition, mesh.center)
-        for vertex in mesh.vertices:
-            self.project(vertex, mesh.center)
+        self.project(mesh.center)
 
-    def project(self, point: Vector3D, mesh_position: Vector3D):
+        for triangle in mesh.triangles:
+            if self.debug:
+                tn = triangle.normal()*5
+                tn = tn.translate(triangle.center)
+                self.project(tn)
+                triangle.debugNormal = tn
+            self.project(triangle.center)
+
+        for vertex in mesh.vertices:
+            self.project(vertex)
+
+    def project(self, point: Vector3D):
         cx = self.C.x
         cy = self.C.y
         cz = self.C.z
@@ -52,18 +63,14 @@ class Camera:
         sy = self.S.y
         sz = self.S.z
 
-        delta = point + mesh_position - self.position
-
-        dot = delta.dot(self.globalBearing)
-        if dot <= 0:
-            return
+        delta = point - self.position
 
         d_x = cy * (sz * delta.y + cz * delta.x) - sy * delta.z
         d_y = sx * (cy * delta.z + sy * (sz * delta.y + cz * delta.x)) + cx * (cz * delta.y - sz * delta.x)
         d_z = cx * (cy * delta.z + sy * (sz * delta.y + cz * delta.x)) - sx * (cz * delta.y - sz * delta.x)
 
         x = (self.view_port.z / d_z) * d_x + self.view_port.x
-        y = (-(self.view_port.z / d_z) * d_y) + self.view_port.y # reverse y as the screen origin is top left
+        y = (-(self.view_port.z / d_z) * d_y) + self.view_port.y  # reverse y as the screen origin is top left
 
         point.x = x
         point.y = y

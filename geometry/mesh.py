@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from tkinter import Canvas
+from typing import List
 
 from geometry.triangle import Triangle
 from custom_math.quaternion import Quaternion
@@ -13,8 +14,8 @@ class Mesh:
         self.rotation = Vector3D()
         self.center = Vector3D()
         self.viewportPosition = Vector3D()
-        self.triangles = []
-        self.vertices = []
+        self.triangles: List[Triangle] = []
+        self.vertices: List[Vector3D] = []
         self.set_triangles(*triangles)
 
     @staticmethod
@@ -42,8 +43,9 @@ class Mesh:
     def set_center(self, center: Vector3D):
         self.center = center
 
-    def translate(self, v: Vector3D):
+    def translate(self, v: Vector3D) -> Mesh:
         self.center = self.center.translate(v)
+        return self
 
     def translate_projections(self, v: Vector3D):
         self.viewportPosition = self.viewportPosition.translate(v)
@@ -93,9 +95,9 @@ class Mesh:
                 pass  # Smooth shading ignored
             elif line_type == "f":
                 groups = triangle_regex.search(line).groups()
-                triangles_vertices.append(vertices[int(groups[0])-1])
-                triangles_vertices.append(vertices[int(groups[1])-1])
-                triangles_vertices.append(vertices[int(groups[2])-1])
+                triangles_vertices.append(vertices[int(groups[0]) - 1])
+                triangles_vertices.append(vertices[int(groups[1]) - 1])
+                triangles_vertices.append(vertices[int(groups[2]) - 1])
             else:
                 print("ignored unknown format line {}".format(line))
 

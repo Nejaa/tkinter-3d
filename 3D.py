@@ -14,10 +14,13 @@ from custom_math.vector3d import Vector3D
 from options import options
 from rendering.collectorStep import CollectorStep
 from rendering.pipeline import Pipeline
+from rendering.positionalClippingStep import PositionalClippingStep
 from rendering.projectionStep import ProjectionStep
 from rendering.renderingStep import RenderingStep
 from rendering.screenClippingStep import ScreenClippingStep
 from rendering.tkinterRenderer import TkinterRenderer
+from rendering.normalCullingStep import NormalCullingStep
+from rendering.worldTransformStep import WorldTransformStep
 from scene.entity import Entity
 from scene.scene import Scene
 from shape.cube import Cube
@@ -42,10 +45,14 @@ plane.translate(Vector3D(x=-cubeSize, y=-cubeSize, z=cubeSize))
 cube = Cube(cube_size=cubeSize)
 meshes = [
     cube,
-    # m,
-    plane,
-    plane.copy().rotate(rotation=Quaternion.axis_angle(Vector3D(x=1), angle=-90)),
-    plane.copy().rotate(rotation=Quaternion.axis_angle(Vector3D(y=1), angle=90)),
+    m,
+    plane,  # back
+    plane.copy().rotate(rotation=Quaternion.axis_angle(Vector3D.right(), angle=90))
+                .translate(Vector3D.backward() * 20 * 4),  # floor
+    plane.copy().rotate(rotation=Quaternion.axis_angle(Vector3D.up(), angle=-90))
+                .translate(Vector3D.backward()*20*4),  # left
+    # plane.copy().rotate(rotation=Quaternion.axis_angle(Vector3D.up(), angle=90))
+    #             .translate(Vector3D.right()*20*4),  # right
     # cube,
     # Cube(cube_size=cubeSize / 2, origin=Vector(y=(cubeSize + cubeSize / 2))),
     # Cube(cube_size=cubeSize / 2, origin=Vector(y=-(cubeSize + cubeSize / 2))),
@@ -78,8 +85,9 @@ rotationSpeeds = [
     # Quaternion.axis_angle(Vector(z=1), angle=-rot_speed),
 ]
 
-camera_origin = cube.center + Vector3D(z=-cubeSize * 4)
-camera = Camera(position=camera_origin, focal_length=500, viewport_offset=windowCenter)
+# camera_origin = cube.center + Vector3D(z=-cubeSize * 4)
+camera_origin = meshes[0].center + Vector3D(z=-100)
+camera = Camera(position=camera_origin, focal_length=500, viewport_offset=windowCenter, debug=True)
 camera_speed = 1.5
 
 frames = 0
@@ -87,6 +95,9 @@ fps = 0
 
 pipeline = Pipeline(steps=[
     CollectorStep(),
+    WorldTransformStep(),
+    PositionalClippingStep(camera=camera),
+    NormalCullingStep(camera=camera),
     ProjectionStep(camera=camera),
     ScreenClippingStep(renderer=renderer),
     RenderingStep(renderer=renderer)

@@ -30,57 +30,8 @@ class ScreenClippingStep(PipelineStep):
             clipped_triangles = []
             for plane in planes:
                 for triangle in triangles:
-                    clip_result = self.clip_triangle(triangle, plane)
+                    clip_result = plane.clip_triangle(triangle)
                     clipped_triangles.extend(clip_result)
                 triangles = clipped_triangles
                 clipped_triangles = []
             mesh.set_triangles(*triangles)
-
-    def clip_triangle(self, triangle: Triangle, plane: Plane) -> List[Triangle]:
-
-        inside_points = []
-        outside_points = []
-
-        if plane.dist(triangle.a) >= 0:
-            inside_points.append(triangle.a)
-        else:
-            outside_points.append(triangle.a)
-        if plane.dist(triangle.b) >= 0:
-            inside_points.append(triangle.b)
-        else:
-            outside_points.append(triangle.b)
-        if plane.dist(triangle.c) >= 0:
-            inside_points.append(triangle.c)
-        else:
-            outside_points.append(triangle.c)
-
-        inside_count = len(inside_points)
-        if inside_count == 0:
-            return []
-        if inside_count == 3:
-            return [triangle]
-
-        outside_count = len(outside_points)
-        if inside_count == 1 and outside_count == 2:
-            return [
-                Triangle(
-                    a=inside_points[0],
-                    b=plane.intersect(line=Line(a=inside_points[0], b=outside_points[0])),
-                    c=plane.intersect(line=Line(a=inside_points[0], b=outside_points[1]))
-                )
-            ]
-
-        if inside_count == 2 and outside_count == 1:
-            t1 = Triangle(a=inside_points[0],
-                          b=inside_points[1],
-                          c=plane.intersect(line=Line(a=inside_points[0], b=outside_points[0])))
-
-            t2 = Triangle(a=inside_points[1],
-                          b=t1.c,
-                          c=plane.intersect(line=Line(a=inside_points[1], b=outside_points[0])))
-            return [
-                t1,
-                t2
-            ]
-
-        return []
