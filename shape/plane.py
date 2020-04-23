@@ -1,10 +1,10 @@
 from geometry.mesh import Mesh
-from geometry.vector import Vector
+from custom_math.vector3d import Vector3D
 
 
 class Plane(Mesh):
-    def __init__(self, origin: Vector = Vector(), grid_size=10.0, length: int = 10):
-        vertices = [[Vector(x=float(x*grid_size), y=float(y*grid_size)) for x in range(length+1)] for y in range(length+1)]
+    def __init__(self, origin: Vector3D = Vector3D(), grid_size=10.0, length: int = 10):
+        vertices = [[Vector3D(x=float(x * grid_size), y=float(y * grid_size)) for x in range(length + 1)] for y in range(length + 1)]
 
         trianglesList = []
         for y in range(len(vertices)-1):

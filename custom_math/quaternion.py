@@ -2,15 +2,15 @@ from __future__ import annotations
 
 from math import radians, sin, cos, sqrt, atan2, asin, pi, fabs, copysign
 
-from geometry.vector import Vector
+from custom_math.vector3d import Vector3D
 
 
 class Quaternion:
-    def __init__(self, w: float, axis: Vector):
+    def __init__(self, w: float, axis: Vector3D):
         self.w = w
         self.axis = axis
 
-    def rotate(self, v: Vector) -> Vector:
+    def rotate(self, v: Vector3D) -> Vector3D:
         q = self
         p = Quaternion(0, v)
         r = q * p * q.conjugate()
@@ -23,8 +23,8 @@ class Quaternion:
     def conjugate(self) -> Quaternion:
         return Quaternion(w=self.w, axis=-self.axis)
 
-    def euler_angles(self) -> Vector:
-        angles = Vector()
+    def euler_angles(self) -> Vector3D:
+        angles = Vector3D()
 
         sinr_cosp = 2 * (self.w * self.axis.x + self.axis.y * self.axis.z)
         cosr_cosp = 1 - 2 * (self.axis.x ** 2 + self.axis.y ** 2)
@@ -47,7 +47,7 @@ class Quaternion:
         return angles
 
     @staticmethod
-    def axis_angle(axis: Vector, angle: float) -> Quaternion:
+    def axis_angle(axis: Vector3D, angle: float) -> Quaternion:
         v = axis.normalize()
         rad = radians(angle / 2)
         s = sin(rad)
@@ -58,14 +58,14 @@ class Quaternion:
 
     @staticmethod
     def identity() -> Quaternion:
-        return Quaternion(1, Vector())
+        return Quaternion(1, Vector3D())
 
     def __mul__(self, other: Quaternion) -> Quaternion:
         t0 = (other.w * self.w - other.axis.x * self.axis.x - other.axis.y * self.axis.y - other.axis.z * self.axis.z)
         t1 = (other.w * self.axis.x + other.axis.x * self.w - other.axis.y * self.axis.z + other.axis.z * self.axis.y)
         t2 = (other.w * self.axis.y + other.axis.x * self.axis.z + other.axis.y * self.w - other.axis.z * self.axis.x)
         t3 = (other.w * self.axis.z - other.axis.x * self.axis.y + other.axis.y * self.axis.x + other.axis.z * self.w)
-        return Quaternion(t0, Vector(x=t1, y=t2, z=t3))
+        return Quaternion(t0, Vector3D(x=t1, y=t2, z=t3))
 
     def __str__(self) -> str:
         return "({:.5f}, {:.5f}, {:.5f}, {:.5f})".format(self.w, self.axis.x, self.axis.y, self.axis.z)

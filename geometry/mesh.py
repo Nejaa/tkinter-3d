@@ -5,25 +5,32 @@ from tkinter import Canvas
 
 from geometry.Triangle import Triangle
 from geometry.camera import Camera
-from geometry.quaternion import Quaternion
-from geometry.vector import Vector
+from custom_math.quaternion import Quaternion
+from custom_math.vector3d import Vector3D
 
 
 class Mesh:
-    def __init__(self, *triangles: Vector):
+    def __init__(self, *triangles: Vector3D):
         assert (len(triangles) % 3 == 0), "incorrect number of points for triangles"
 
-        self.rotation = Vector()
-        self.center = Vector()
-        self.viewportPosition = Vector()
+        self.rotation = Vector3D()
+        self.center = Vector3D()
+        self.viewportPosition = Vector3D()
         self.vertices = triangles
+        self.distinctVertices = []
+        for vertex in self.vertices:
+            if vertex in self.distinctVertices:
+                continue
+            self.distinctVertices.append(vertex)
+
         self.triangles = []
         i = 0
-        while i < len(triangles):
+        while i < len(self.vertices):
             self.triangles.append(Triangle(self.vertices[i], self.vertices[i + 1], self.vertices[i + 2]))
             i += 3
 
-    def set_center(self, center: Vector):
+
+    def set_center(self, center: Vector3D):
         self.center = center
 
     def draw(self, canvas: Canvas, debug=False):
@@ -33,12 +40,12 @@ class Mesh:
             canvas.create_text(self.viewportPosition.projection.x, self.viewportPosition.projection.y,
                                text="Center = {}\nRotation = {}".format(self.center, self.rotation))
             for vertex in self.vertices:
-                vertex.draw(canvas)
+                canvas.create_text(vertex.projection.x, vertex.projection.y, text=vertex.label)
 
-    def translate(self, v: Vector):
+    def translate(self, v: Vector3D):
         self.center.translate(v)
 
-    def translate_projections(self, v: Vector):
+    def translate_projections(self, v: Vector3D):
         seen = []
         self.viewportPosition.projection.translate(v)
         for vertex in self.vertices:
@@ -77,7 +84,7 @@ class Mesh:
 
         camera.project(point=self.viewportPosition, mesh_position=self.center)
 
-    def copy(self, offset: Vector = Vector()) -> Mesh:
+    def copy(self, offset: Vector3D = Vector3D()) -> Mesh:
         vertices = [p.copy() for p in self.vertices]
         m = Mesh(*vertices)
         m.set_center(self.center.copy())
@@ -102,7 +109,7 @@ class Mesh:
                 pass  # mesh name ignored
             elif line_type == "v":
                 groups = vertex_regex.search(line).groups()
-                vertex = Vector(x=float(groups[0]), y=float(groups[1]), z=float(groups[2]))
+                vertex = Vector3D(x=float(groups[0]), y=float(groups[1]), z=float(groups[2]))
                 vertices.append(vertex)
             elif line_type == "s":
                 pass  # Smooth shading ignored

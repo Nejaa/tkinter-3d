@@ -9,6 +9,7 @@ class Options:
         self.originOffset = 1000
         self.cross_hair_scale = 10
         self.global_movement = False
+        self.draw_crosshair = True
 
     @property
     def tick_delay(self):

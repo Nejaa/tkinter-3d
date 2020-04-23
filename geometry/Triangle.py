@@ -1,11 +1,11 @@
 from tkinter import Canvas
 
 from geometry.line import Line
-from geometry.vector import Vector
+from custom_math.vector3d import Vector3D
 
 
 class Triangle:
-    def __init__(self, a: Vector, b: Vector, c: Vector):
+    def __init__(self, a: Vector3D, b: Vector3D, c: Vector3D):
         self.a = a  # unused but who knows
         self.b = b  # unused but who knows
         self.c = c  # unused but who knows

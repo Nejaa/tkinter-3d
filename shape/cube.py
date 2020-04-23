@@ -1,24 +1,24 @@
 from geometry.mesh import Mesh
-from geometry.vector import Vector
+from custom_math.vector3d import Vector3D
 
 
 class Cube(Mesh):
-    def __init__(self, origin: Vector = Vector(), cube_size=10):
-        center = Vector(
+    def __init__(self, origin: Vector3D = Vector3D(), cube_size=10):
+        center = Vector3D(
             x=cube_size / 2,
             y=cube_size / 2,
             z=cube_size / 2,
         )
 
         vertices = {
-            "A": Vector("A", 0, 0, 0) - center,
-            "B": Vector("B", 0, cube_size, 0) - center,
-            "C": Vector("C", cube_size, cube_size, 0) - center,
-            "D": Vector("D", cube_size, 0, 0) - center,
-            "E": Vector("E", 0, 0, cube_size) - center,
-            "F": Vector("F", 0, cube_size, cube_size) - center,
-            "G": Vector("G", cube_size, cube_size, cube_size) - center,
-            "H": Vector("H", cube_size, 0, cube_size) - center,
+            "A": Vector3D("A", 0, 0, 0) - center,
+            "B": Vector3D("B", 0, cube_size, 0) - center,
+            "C": Vector3D("C", cube_size, cube_size, 0) - center,
+            "D": Vector3D("D", cube_size, 0, 0) - center,
+            "E": Vector3D("E", 0, 0, cube_size) - center,
+            "F": Vector3D("F", 0, cube_size, cube_size) - center,
+            "G": Vector3D("G", cube_size, cube_size, cube_size) - center,
+            "H": Vector3D("H", cube_size, 0, cube_size) - center,
         }
 
         triangles = [

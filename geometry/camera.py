@@ -1,27 +1,28 @@
 from math import cos, sin
 
-from geometry.quaternion import Quaternion
-from geometry.vector import Vector
+from custom_math.quaternion import Quaternion
+from custom_math.vector3d import Vector3D
+from geometry.mesh import Mesh
 
 
 class Camera:
-    def __init__(self, position: Vector = Vector(), focal_length: float = 500, viewport_offset: Vector = Vector()):
+    def __init__(self, position: Vector3D = Vector3D(), focal_length: float = 500, viewport_offset: Vector3D = Vector3D()):
         self.position = position.copy(label="camera")
         self.rotation = Quaternion.identity()
-        self.bearing = Vector(z=1)
-        self.bearing.projection = Vector(z=1)
+        self.bearing = Vector3D(z=1)
+        self.bearing.projection = Vector3D(z=1)
         self.view_port = viewport_offset.copy(label="view_port")
         self.view_port.z = focal_length
-        self.C = Vector(x=cos(0), y=cos(0), z=cos(0))
-        self.S = Vector(x=sin(0), y=sin(0), z=sin(0))
+        self.C = Vector3D(x=cos(0), y=cos(0), z=cos(0))
+        self.S = Vector3D(x=sin(0), y=sin(0), z=sin(0))
 
-    def translate(self, v: Vector, global_movement: bool = False):
+    def translate(self, v: Vector3D, global_movement: bool = False):
         if not global_movement:
             v = self.rotation.rotate(v)
 
         self.position.translate(v)
 
-    def rotate(self, axis: Vector, angle: float, global_rotation: bool = False):
+    def rotate(self, axis: Vector3D, angle: float, global_rotation: bool = False):
         rot = Quaternion.axis_angle(axis=axis, angle=angle)
 
         if global_rotation:
@@ -34,10 +35,13 @@ class Camera:
     def update_data(self):
         self.bearing.projection.move_to(self.rotation.rotate(self.bearing))
         euler = self.rotation.euler_angles()
-        self.C = Vector(x=cos(euler.x), y=cos(euler.y), z=cos(euler.z))
-        self.S = Vector(x=sin(euler.x), y=sin(euler.y), z=sin(euler.z))
+        self.C = Vector3D(x=cos(euler.x), y=cos(euler.y), z=cos(euler.z))
+        self.S = Vector3D(x=sin(euler.x), y=sin(euler.y), z=sin(euler.z))
 
-    def project(self, point: Vector, mesh_position: Vector):
+    def project_mesh(self, mesh: Mesh):
+
+
+    def project(self, point: Vector3D, mesh_position: Vector3D):
         cx = self.C.x
         cy = self.C.y
         cz = self.C.z
@@ -60,7 +64,7 @@ class Camera:
         x = (self.view_port.z / d_z) * d_x + self.view_port.x
         y = (-(self.view_port.z / d_z) * d_y) + self.view_port.y # reverse y as the screen origin is top left
 
-        point.projection = Vector(point.label, x, y)
+        point.projection = Vector3D(point.label, x, y)
         point.projection.d = dot
         point.visible = True
 
