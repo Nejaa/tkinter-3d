@@ -8,6 +8,7 @@ class PositionalClippingStep(PipelineStep):
     def __init__(self, camera: Camera):
         super().__init__()
         self.camera = camera
+        self.step_name = "Positional Clipping"
 
     def process_scene(self, scene: Scene):
 

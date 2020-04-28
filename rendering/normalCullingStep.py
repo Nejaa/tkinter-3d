@@ -7,8 +7,10 @@ class NormalCullingStep(PipelineStep):
     def __init__(self, camera: Camera):
         super().__init__()
         self.camera = camera
+        self.step_name = "Normal Culling"
 
     def process_scene(self, scene: Scene):
+
         for entity in scene.entities():
             mesh = entity.geometry
             triangles = mesh.triangles

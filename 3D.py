@@ -7,7 +7,7 @@ import time
 from timeloop import Timeloop
 
 from geometry import geometry_options
-from geometry.camera import Camera
+from geometry.camera import Camera, PseudoPerspectiveMatrixBuilder, ProjectionType
 from geometry.mesh import Mesh
 from custom_math.quaternion import Quaternion
 from custom_math.vector3d import Vector3D
@@ -15,6 +15,7 @@ from options import options
 from rendering.collectorStep import CollectorStep
 from rendering.pipeline import Pipeline
 from rendering.positionalClippingStep import PositionalClippingStep
+from rendering.positionalCullingStep import PositionalCullingStep
 from rendering.projectionStep import ProjectionStep
 from rendering.renderingStep import RenderingStep
 from rendering.screenClippingStep import ScreenClippingStep
@@ -30,27 +31,33 @@ geometry_options.line_thickness = 1
 
 windowCenter = Vector3D(x=options.width / 2, y=options.height / 2, z=0)
 
-origin = Vector3D(x=options.originOffset, y=options.originOffset, z=options.originOffset)
+origin = Vector3D(x=0, y=0, z=options.originOffset)
+camera = Camera(position=Vector3D(), focal_length=500, viewport_offset=windowCenter,
+                # projection_type=ProjectionType.PseudoPerspective,
+                projection_type=ProjectionType.RealPerspective,
+                debug=False)
+camera_speed = 1.5
+
 
 tk = Tk()
 tk.config(cursor="none")
-renderer = TkinterRenderer(tk, width=options.width, height=options.height)
+renderer = TkinterRenderer(tk, width=options.width, height=options.height, camera=camera)
 
-m = Mesh.import_from("ressources/Cylinder.obj")
-m.scale(20)
-m.rotate(rotation=Quaternion.axis_angle(Vector3D(y=1), 180))
+m = Mesh.import_from("ressources/Axix2.obj")
+m.scale(10)
+# m.rotate(rotation=Quaternion.axis_angle(Vector3D(y=1), 180))
 cubeSize = 20
-plane = Plane(length=4, grid_size=20.0)
-plane.translate(Vector3D(x=-cubeSize, y=-cubeSize, z=cubeSize))
+# plane = Plane(length=4, grid_size=20.0)
+# plane.translate(Vector3D(x=-cubeSize, y=-cubeSize, z=cubeSize))
 cube = Cube(cube_size=cubeSize)
 meshes = [
-    cube,
+    # cube,
     m,
-    plane,  # back
-    plane.copy().rotate(rotation=Quaternion.axis_angle(Vector3D.right(), angle=90))
-                .translate(Vector3D.backward() * 20 * 4),  # floor
-    plane.copy().rotate(rotation=Quaternion.axis_angle(Vector3D.up(), angle=-90))
-                .translate(Vector3D.backward()*20*4),  # left
+    # plane,  # back
+    # plane.copy().rotate(rotation=Quaternion.axis_angle(Vector3D.right(), angle=90))
+    #             .translate(Vector3D.backward() * 20 * 4),  # floor
+    # plane.copy().rotate(rotation=Quaternion.axis_angle(Vector3D.up(), angle=-90))
+    #             .translate(Vector3D.backward()*20*4),  # left
     # plane.copy().rotate(rotation=Quaternion.axis_angle(Vector3D.up(), angle=90))
     #             .translate(Vector3D.right()*20*4),  # right
     # cube,
@@ -63,20 +70,16 @@ meshes = [
 ]
 [m.translate(origin) for m in meshes]
 entities = [Entity(geometry=m) for m in meshes]
-m.translate(Vector3D(x=cubeSize * 2))
-
-scene = Scene()
-[scene.scene_root.add_entity(e) for e in entities]
+# m.translate(Vector3D(x=cubeSize * 2))
+# camera.position = meshes[0].center + Vector3D(z=-500)
 
 rot_speed = 180 / options.tickRate  # deg/s = rot speed/tick
-cube_rot_axis = Vector3D(x=random(), y=random(), z=random())
-point2 = cube_rot_axis.copy() * 100
-point1 = -point2
+random_rotation = Vector3D(x=random(), y=random(), z=random())
 rotationSpeeds = [
     # None,
     # None,
     # None,
-    # Quaternion.axis_angle(cube_rot_axis, angle=rot_speed),
+    # Quaternion.axis_angle(random_rotation, angle=rot_speed),
     # Quaternion.axis_angle(Vector(x=1), angle=-rot_speed),
     # Quaternion.axis_angle(Vector(x=1), angle=rot_speed),
     # Quaternion.axis_angle(Vector(y=1), angle=rot_speed),
@@ -85,21 +88,16 @@ rotationSpeeds = [
     # Quaternion.axis_angle(Vector(z=1), angle=-rot_speed),
 ]
 
-# camera_origin = cube.center + Vector3D(z=-cubeSize * 4)
-camera_origin = meshes[0].center + Vector3D(z=-100)
-camera = Camera(position=camera_origin, focal_length=500, viewport_offset=windowCenter, debug=True)
-camera_speed = 1.5
-
-frames = 0
-fps = 0
-
+scene = Scene()
+[scene.scene_root.add_entity(e) for e in entities]
 pipeline = Pipeline(steps=[
     CollectorStep(),
-    WorldTransformStep(),
-    PositionalClippingStep(camera=camera),
-    NormalCullingStep(camera=camera),
+    WorldTransformStep(camera=camera),
+    # PositionalCullingStep(camera=camera),
+    # PositionalClippingStep(camera=camera),
+    # NormalCullingStep(camera=camera),
     ProjectionStep(camera=camera),
-    ScreenClippingStep(renderer=renderer),
+    # ScreenClippingStep(renderer=renderer),
     RenderingStep(renderer=renderer)
 ])
 
@@ -146,7 +144,7 @@ def follow_mouse(event: Event):
 
     move = Vector3D(x=event.x, y=event.y)
 
-    if move.is_same(windowCenter):
+    if move == windowCenter:
         return
 
     offset = move - windowCenter
@@ -164,12 +162,12 @@ def follow_mouse(event: Event):
         camera.rotate(Vector3D(y=1), camera_speed * offset.x, True)
         axis.y = 1
 
-    if offset.y < 0:
-        camera.rotate(Vector3D(x=1), camera_speed * offset.y)
-        axis.x = -1
-    elif offset.y > 0:
-        camera.rotate(Vector3D(x=1), camera_speed * offset.y)
-        axis.x = 1
+    # if offset.y < 0:
+    #     camera.rotate(Vector3D(x=1), camera_speed * offset.y)
+    #     axis.x = -1
+    # elif offset.y > 0:
+    #     camera.rotate(Vector3D(x=1), camera_speed * offset.y)
+    #     axis.x = 1
 
     tk.event_generate('<Motion>', warp=True, x=windowCenter.x, y=windowCenter.y)
 
@@ -183,6 +181,7 @@ def adjust_viewport(amount: float):
 
 def toggle_info(_: Event):
     options.debug = not options.debug
+    camera.debug = options.debug
 
 
 def toggle_fps(_: Event):

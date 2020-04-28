@@ -3,6 +3,8 @@ from __future__ import annotations
 from math import degrees, sqrt
 from typing import Optional
 
+from custom_math.matrix import Matrix
+
 
 class Vector3D:
     def __init__(self, label="", x: float = 0.0, y: float = 0.0, z: float = 0.0):
@@ -10,9 +12,13 @@ class Vector3D:
         self.x = x
         self.y = y
         self.z = z
+        self.w = 1
+        self.debug_txt = self.__str__()
 
     def copy(self, label: Optional[str] = None) -> Vector3D:
-        return Vector3D(label=self.label if label is None else label, x=self.x, y=self.y, z=self.z)
+        v = Vector3D(label=self.label if label is None else label, x=self.x, y=self.y, z=self.z)
+        v.w = self.w
+        return v
 
     def translate(self, v: Vector3D) -> Vector3D:
         newV = self.copy()
@@ -36,6 +42,8 @@ class Vector3D:
 
     def normalize(self) -> Vector3D:
         mag = self.magnitude()
+        if mag == 0:
+            return Vector3D()
         return self / mag
 
     def move_to(self, v: Vector3D):
@@ -80,6 +88,12 @@ class Vector3D:
     def __str__(self) -> str:
         return "({:.2f}, {:.2f}, {:.2f})".format(self.x, self.y, self.z)
 
+    def __hash__(self):
+        return hash((self.x, self.y, self.z))
+
+    def __eq__(self, other: Vector3D):
+        return self.x == other.x and self.y == other.y and self.z == other.z
+
     def is_same(self, other: Vector3D) -> bool:
         return self.x == other.x and self.y == other.y and self.z == other.z
 
@@ -112,3 +126,6 @@ class Vector3D:
     @staticmethod
     def backward() -> Vector3D:
         return Vector3D(z=-1)
+
+    def to_matrix(self) -> Matrix:
+        return Matrix([[self.x], [self.y], [self.z], [self.w]])

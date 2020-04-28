@@ -4,10 +4,11 @@ from scene.scene import Scene
 
 
 class Renderer:
-    curScene: Scene = None
-    newScene: Scene = None
+    curScene = None
+    newScene = None
     width: int
     height: int
+    inverted_y: bool
 
     def __init__(self):
         super().__init__()

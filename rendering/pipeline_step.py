@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from queue import Queue, Empty, Full
 from threading import Thread
+from time import time
 from typing import Optional
 
 from scene.scene import Scene
@@ -10,6 +11,7 @@ class PipelineStep(ABC, Thread):
     input_queue: Queue = None
     output_queue: Queue = None
     running: bool = False
+    step_name: str = None
 
     def __init__(self):
         super().__init__()
@@ -42,7 +44,12 @@ class PipelineStep(ABC, Thread):
         self.running = True
         while self.running:
             scene = self.fetch_scene()
+            t0 = time()
             self.process_scene(scene=scene)
+            elapsed = (time() - t0) * 1000
+            if self.step_name is not None and elapsed > 10:
+                print("{} step took {:0.4f} ms\n".format(self.step_name, elapsed))
+
             self.send_scene(scene=scene)
 
     def stop(self):

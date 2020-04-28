@@ -9,9 +9,9 @@ class Triangle:
         self.a = a
         self.b = b
         self.c = c
-        self.ab = Line(self.a, self.b)
-        self.bc = Line(self.b, self.c)
-        self.ca = Line(self.c, self.a)
+        self.ab: Line = None
+        self.bc: Line = None
+        self.ca: Line = None
         self.debugNormal: Vector3D = None
         self.projectedNormal: Vector3D = None
         self.center = Vector3D(
@@ -19,6 +19,7 @@ class Triangle:
             y=self.a.y + self.b.y + self.c.y,
             z=self.a.z + self.b.z + self.c.z,
         ) / 3
+        self.build_lines()
 
     def copy(self) -> Triangle:
         triangle = Triangle(a=self.a.copy(), b=self.b.copy(), c=self.c.copy(), )
@@ -32,3 +33,7 @@ class Triangle:
         cross = cross.normalize()
         return cross
 
+    def build_lines(self):
+        self.ab = Line(self.a, self.b)
+        self.bc = Line(self.b, self.c)
+        self.ca = Line(self.c, self.a)

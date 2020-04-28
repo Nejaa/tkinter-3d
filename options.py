@@ -2,14 +2,17 @@ class Options:
     def __init__(self):
         self.debug = False
         self.__draw_fps = True
-        self.tickRate = 200
+        self.tickRate = 240
         self.refreshRate = 120
         self.width = 1200
         self.height = 1000
-        self.originOffset = 1000
+        self.originOffset = 200
         self.cross_hair_scale = 10
         self.global_movement = False
         self.draw_crosshair = True
+        self.fov = 105
+        self.close_plane = 0.1
+        self.far_plane = 10000
 
     @property
     def tick_delay(self):

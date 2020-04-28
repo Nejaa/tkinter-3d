@@ -16,7 +16,7 @@ class Plane:
         ad = line.a.dot(self.normal)
         bd = line.b.dot(self.normal)
 
-        t = (-plane_d - ad) / (bd-ad)
+        t = (-plane_d - ad) / (bd - ad)
 
         line_start_end = line.b - line.a
         line_to_intersect = line_start_end * t
@@ -71,9 +71,6 @@ class Plane:
             t2 = Triangle(a=inside_points[1],
                           b=t1.c,
                           c=self.intersect(line=Line(a=inside_points[1], b=outside_points[0])))
-            return [
-                t1,
-                t2
-            ]
+            return [t1, t2]
 
         return []

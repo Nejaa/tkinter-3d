@@ -1,19 +1,24 @@
 from __future__ import annotations
 
 import time
+from datetime import timedelta
 from tkinter import Canvas, Tk
 
-from custom_math.LERp import lerp
+from PIL.ImageTk import PhotoImage
+
 from custom_math.vector3d import Vector3D
 from geometry import geometry_options
 from geometry.camera import Camera
 from options import options
 from rendering.renderer import Renderer
+from scene.scene import Scene
+
+import OpenGL
 
 
-class TkinterRenderer(Canvas, Renderer):
-    def __init__(self, root: Tk, width: int, height: int, camera: Camera, **kwargs):
-        Canvas.__init__(self, root, width=width, height=height, **kwargs)
+class OpenGLRenderer(Canvas, Renderer):
+    def __init__(self, width: int, height: int, camera: Camera, **kwargs):
+        Canvas.__init__(self, width=width, height=height, **kwargs)
         self.pack()
 
         self.width = width
@@ -22,18 +27,19 @@ class TkinterRenderer(Canvas, Renderer):
 
         self.frames = 0
         self.fps = 0
-        self.inverted_y = True
+        self.inverted_y = False
 
         self.camera = camera
-        camera.invert_y = True
+        camera.invert_y = False
 
         # start renderer
         self.after(ms=1000, func=self.fps_counter)
-        self.after(ms=100, func=self.draw)
+        self.after(ms=1, func=self.draw)
 
     def draw(self):
         if self.newScene is not None:
             self.curScene = self.newScene
+            self.newScene = None
 
         if self.curScene is None:
             self.after(ms=10, func=self.draw)
@@ -42,15 +48,15 @@ class TkinterRenderer(Canvas, Renderer):
         t0 = time.time()
         self.delete("all")
 
-        if self.camera.projection_type.lerp_projection:
-            for entity in self.curScene.entities():
-                mesh = entity.geometry
-                for vertex in mesh.vertices:
-                    vertex.x = lerp(0, self.width, -1, 1, vertex.x)
-                    vertex.y = lerp(0, self.height, -1, 1, vertex.y)
-
         for entity in self.curScene.entities():
             mesh = entity.geometry
+            # scale into view for openGL
+            for vertex in mesh.vertices:
+                vertex.x += 1
+                vertex.x += 1
+                vertex.x *= 0.5 * self.width
+                vertex.y *= 0.5 * self.height
+
             for triangle in mesh.triangles:
                 self.create_line(triangle.ab.a.x, triangle.ab.a.y,
                                  triangle.ab.b.x, triangle.ab.b.y,
@@ -90,9 +96,7 @@ class TkinterRenderer(Canvas, Renderer):
 
         self.frames += 1
 
-        self.newScene = None
-
-        self.after(ms=100, func=self.draw)
+        self.after(ms=1, func=self.draw)
 
     def fps_counter(self):
         self.fps = self.frames

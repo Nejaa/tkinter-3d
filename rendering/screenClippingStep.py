@@ -14,6 +14,8 @@ class ScreenClippingStep(PipelineStep):
         super().__init__()
         self.width = renderer.width
         self.height = renderer.height
+        self.step_name = "Screen Clipping"
+
 
     def process_scene(self, scene: Scene):
 
